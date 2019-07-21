@@ -1,0 +1,54 @@
+resource "aws_db_option_group" "mysql56" {
+  name = "dr-demo-db"
+  engine_name = "mysql"
+  major_engine_version = "5.6"
+  option_group_description = "mysql56 DR demo prod env"
+}
+
+resource "aws_db_instance" "mysql56" {
+  identifier = "dr-demo-prod"
+  name = "demo"
+  instance_class = "db.t2.small"
+  allocated_storage = 20
+  max_allocated_storage = 1000
+  storage_type = "gp2"
+  engine = "mysql"
+  engine_version = "5.6"
+  username = var.db_username
+  password = var.db_password
+  db_subnet_group_name = data.terraform_remote_state.basic.outputs.db_subnet_group_id
+  vpc_security_group_ids = [data.terraform_remote_state.basic.outputs.db_sg_id]
+  option_group_name = aws_db_option_group.mysql56.id
+  multi_az = false
+  publicly_accessible = false
+  deletion_protection = false
+  apply_immediately = true
+  skip_final_snapshot = true
+}
+
+resource "aws_elasticache_parameter_group" "redis" {
+  family = "redis5.0"
+  name = "dr-demo-cache"
+}
+
+resource "aws_elasticache_cluster" "redis" {
+  cluster_id           = "dr-demo-prod-redis"
+  engine               = "redis"
+  node_type            = "cache.t2.small"
+  num_cache_nodes      = 1
+  parameter_group_name = aws_elasticache_parameter_group.redis.name
+  engine_version       = "5.0.4"
+  port                 = 6379
+  subnet_group_name = data.terraform_remote_state.basic.outputs.cache_subnet_group_id
+  security_group_ids = [data.terraform_remote_state.basic.outputs.db_sg_id]
+}
+
+
+
+
+
+
+
+
+
+
