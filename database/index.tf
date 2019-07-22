@@ -6,7 +6,7 @@ provider "aws" {
 
 data "terraform_remote_state" "basic" {
   backend = "s3"
-  workspace = "bjs"
+  workspace = terraform.workspace
   config = {
     bucket = "tf-state"
     key = "lab798-dr-basic/terraform.tfstate"
@@ -15,12 +15,8 @@ data "terraform_remote_state" "basic" {
   }
 }
 
-
 output "db_endpoint" {
   value = split(":", aws_db_instance.mysql56.endpoint)[0]
 }
 
-# primary endpoint is cache_nodes.0
-output "cache_endpoint" {
-  value = aws_elasticache_cluster.redis.cache_nodes.0.address
-}
+

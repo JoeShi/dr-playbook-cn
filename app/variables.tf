@@ -47,7 +47,3 @@ variable "app_s3" {
 variable "db_endpoint" {
   default = "dr-demo-prod.c7gghk4aijib.rds.cn-north-1.amazonaws.com.cn"
 }
-
-variable "cache_endpoint" {
-  default = "dr-demo-prod-redis.dvumoo.0001.cnn1.cache.amazonaws.com.cn"
-}

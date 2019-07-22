@@ -57,8 +57,7 @@ data "template_file" "wp_config" {
     db_endpoint = var.db_endpoint
     db_username = var.db_username
     db_password = var.db_password
-    cache_endpoint = var.cache_endpoint
-
+    cache_endpoint = aws_elasticache_cluster.redis.cache_nodes.0.address
   })
 }
 

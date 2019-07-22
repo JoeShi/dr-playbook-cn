@@ -3,7 +3,7 @@ variable "profile" {
 }
 
 variable "region" {
-  default = "cn-north-1"
+  default = "cn-northwest-1"
 }
 
 variable "vpc_cidr" {

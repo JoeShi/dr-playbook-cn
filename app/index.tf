@@ -6,7 +6,7 @@ provider "aws" {
 
 data "terraform_remote_state" "basic" {
   backend = "s3"
-  workspace = "bjs"
+  workspace = terraform.workspace
   config = {
     bucket = "tf-state"
     key = "lab798-dr-basic/terraform.tfstate"

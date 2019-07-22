@@ -3,8 +3,7 @@ terraform {
 
   backend "s3" {
     bucket = "tf-state"
-    key = "lab798-dr-prod-app/terraform.tfstate"
-    // key = "lab798-dr-backup-app/terraform.tfstate"
+    key = "lab798-dr-database/terraform.tfstate"
     dynamodb_table = "tf-state"
     region = "cn-northwest-1"
     profile = "zhy"
