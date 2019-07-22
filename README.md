@@ -11,6 +11,8 @@
 （可以修改为其他类型的 backend ）需要使用到 S3 Bucket 和 DynamoDB 用于存储状态信息，请提前创建 S3 Bucket 和 DynamoDB Table, 并且
 该 DynamoDB Table 的 primary key 必须为 `LockID`。
 
+4. 该实验以 WordPress 为例，由于 WordPress 会记录域名，请勿使用ELB的域名直接访问, 为 WordPress 配置自定义域名。
+
 ## 目录结构
 
 - basic: 基础结构。可用于构建基础网络架构, 基础安全配置等等。 包含如下资源：
@@ -44,6 +46,12 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 
 项目内有三个文件夹，`basic`, `database`, `app` 我们将以`<project>`表示。
 
+出于演示的目的，已经提前在 AWS 中国区域部署了 WordPress 5.2.2 版本的AMI. WordPress 应用程序位
+于 `/var/www/html` 目录下，可直接使用。
+
+* 北京区域 AMI: ami-0eebef1aaa174c852
+* 宁夏区域 AMI: ami-0cbbf10eaeaf0f9c3
+
 
 ### 准备工作
 
@@ -72,7 +80,7 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 
 1. 修改 `basic/variables.tf` 和 `basic/terraform.tf`
 2. 在 basic 目录下执行 `terraform init`
-3. 执行 `terraform workspace create prod` 创建 模拟生产环境的 workspace. 
+3. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace. 
 我们使用 workspace 来区分是模拟生产环境或者灾备环境
 4. 执行 `terraform apply` 创建基础网络环境
 
@@ -81,14 +89,14 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 1. 在模拟生产区域创建 S3 Bucket, 并启用 **versioning** 功能，用于存储 WordPress media 文件
 2. 修改 `database/variables.tf` 和 `database/terraform.tf`
 3. 在 database 目录下执行 `terraform init`
-4. 执行 `terraform workspace create prod` 创建 模拟生产环境的 workspace. 
+4. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace. 
 5. 执行 `terraform apply` 创建数据库相关资源
 
 **创建应用层**
 
 1. 修改 `app/variables.tf` 和 `app/terraform.tf`
 2. 在 basic 目录下执行 `terraform init`
-3. 执行 `terraform workspace create prod` 创建 模拟生产环境的 workspace. 
+3. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace. 
 4. 执行 `terraform apply` 创建基础网络环境
 
 
@@ -108,35 +116,49 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 
 1. 修改 `basic/dr.tfvars` 和 `basic/terraform.tf`
 2. 在 basic 目录下执行 `terraform init`
-3. 执行 `terraform workspace create dr` 创建灾备环境的 workspace. 
+3. 执行 `terraform workspace new dr` 创建灾备环境的 workspace. 
 我们使用 workspace 来区分是模拟生产环境或者灾备环境
 4. 执行 `terraform apply --var-file=dr.tfvars` 创建基础网络环境
 
 **S3 数据同步**
 
 1. 在灾备区域中创建 S3 Bucket, 并启用 **versioning** 功能，用于备份 WordPress 的 Media 文件
+1. 利用 AWS CLI 将已存在的文件拷贝到灾备区域，`aws s3 sync s3://SOURCE_BUCKET_NAME s3://TARGET_BUCKET_NAME` 
 1. 在 S3 Console 中选择生产区域的 S3 Bucket, 点击 **Management**, 选择 **Replication**
 1. 点击 **Add Rule**, 选择 **Entire bucket**, 并点击 **Next**
 1. 选择在灾备区域中选择的目标桶，点击 **Next**
 1. 在 IAM Role 中选择 **Create new role**, 输入 **Rule name**, 选择 **Next**。
+![](assets/crr-wizard-set-iam-role.png)
 1. 选择 **Save** 保存复制规则。
 
 开启 S3 Cross Region Replication 的更多资料，请参考[这里](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-crr.html#enable-crr-add-rule)。
 
 **RDS 数据同步**
 
-TODO
 
-1. 在生产区域中选中 RDS 实例，点击右上角 **Actions**, 选择 **Create read replica**
-1. 
-1.  
+1. 在生产区域中选中 RDS 实例，点击右上角 **Actions**, 选择 **Create read replica**。 
+如果该按钮显示为灰色，请先 **Take Snapshot**, 等快照创建完毕后，再创建跨区域只读副本
+1. 在 **Create read replica DB instance**页面，选择 **Destination region** 为灾备区域，
+选择 **Destination DB subnet group** 为 **db-group**(在 basic 模板中自动创建)
+![](assets/rds-crr.png)
+1. 根据需要，选择 **instance class** 和 **Multi-AZ deployment**
+1. 在 **Settings** 中 **DB instance identifier** 中输入数据库实例名称
+1. 其他设置保持默认, 选择 **Create read replica**，等待灾备区域的数据库实例启动完成
+1. 由于创建跨区域只读库无法选择安全组，因此我们需要手动跨区域只读节点的安全组。在 RDS Console 
+选择进入可读节点，选择右上角 **Modify**
+1. 在 **Network & Security** 选择 **DB_SG**(在 basic 模板中自动创建), 选择右下角 **Continue**
+![](assets/change_sg.png)
+1. 在 **Scheduling of modifications** 选择 **Apply immediately**
+1. 选择 **Modify DB Instance**
 
 **修改灾备应用脚本启动参数**
 
+1. 将跨区域只读库的 endpoint 更新到 **`basic/dr.tfvars`**
 1. 修改 **`basic/dr.tfvars`**, `basic/terraform.tf`(如之前未修改)
-2. 在 app 目录下执行 `terraform init`
-3. 执行 `terraform workspace create dr` 创建灾备环境的 workspace. 
+1. 在 app 目录下执行 `terraform init`
+1. 执行 `terraform workspace new dr` 创建灾备环境的 workspace. 
 
+修改灾备脚本参数时，要谨慎核对参数。
 
 ### 故障转移 
 
@@ -144,12 +166,12 @@ TODO
 
 在灾难发生后，执行故障转移, 请确保 `app` 目录下的 terraform workspace 是 `dr`。
 
-1. 在 app 目录下 执行 `terraform init` （如已执行，可跳过）
 1. 执行 `terraform apply --var-file=dr.tfvars` 来启动资源
-1. 在 灾备区域 RDS Console 将 RDS Instance 提升为 master （可与上一步同时执行）
+1. 在 灾备区域 RDS Console 将 RDS Instance 提升为 master （可与上一步同时执行)。在灾备区域 RDS 控制台选择实例，
+点击 **Actions**, 选择 **Promote**，在弹出的对话中选择 **Continue**
+![](assets/rds_promote.png)
 1. 测试。功能测试应该在之前测试过，这里主要测试连通性
 1. 切换 DNS
-
 
 ### 灾后恢复
 
@@ -167,7 +189,5 @@ TODO
 
 ## 素材
 
-BJS AMI: ami-0eebef1aaa174c852
-ZHY AMI: ami-0cbbf10eaeaf0f9c3
 
-WordPress 应用程序位于 `/var/www/html` 目录下
+
