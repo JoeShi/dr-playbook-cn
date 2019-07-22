@@ -1,3 +1,4 @@
+# 本地 aws profile name
 variable "profile" {
   default = "zhy"
 }
