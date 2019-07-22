@@ -26,10 +26,6 @@ variable "app_desired_capacity" {
   default = 1
 }
 
-variable "app_domain" {
-  default = "wp.joeshi.net"
-}
-
 # wordpress_ami
 variable "app_ami" {
   type = "map"
