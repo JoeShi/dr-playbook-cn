@@ -27,10 +27,9 @@ resource "aws_db_instance" "mysql56" {
 }
 
 
-
-
-
-
+output "db_endpoint" {
+  value = split(":", aws_db_instance.mysql56.endpoint)[0]
+}
 
 
 

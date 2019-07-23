@@ -1,3 +1,15 @@
+terraform {
+  required_version = "~> 0.12.3"
+
+  backend "s3" {
+    bucket = "tf-state"                       # 修改成预先创建的 Terraform S3 backend bucket
+    key = "lab798-dr-app/terraform.tfstate"
+    dynamodb_table = "tf-state"
+    region = "cn-northwest-1"                 # 修改成 backend 所在的 region
+    profile = "zhy"                           # 修改成本地的 AWS Profile
+  }
+}
+
 provider "aws" {
   profile = var.profile
   region = var.region
@@ -8,13 +20,10 @@ data "terraform_remote_state" "basic" {
   backend = "s3"
   workspace = terraform.workspace
   config = {
-    bucket = "tf-state"
+    bucket = "tf-state"                         # 修改成预先创建的 Terraform S3 backend bucket
     key = "lab798-dr-basic/terraform.tfstate"
-    region = "cn-northwest-1"
-    profile = "zhy"
+    region = "cn-northwest-1"                   # 修改成 backend 所在的 region
+    profile = "zhy"                             # 修改成本地的 AWS Profile
   }
 }
 
-output "alb_cname" {
-  value = aws_lb.main.dns_name
-}

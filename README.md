@@ -42,7 +42,8 @@
 ## 使用方法 Step Guide
    
 Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 Bucket 和一个 DynamoDB Table, 
-该 DynamoDB 的 primary key 必须为 `LockID`，类型为 string。
+该 DynamoDB 的 primary key 必须为 `LockID`，类型为 string。在本环境中，该 DynamoDB Table名称
+为`tf-state`。
 
 项目内有三个文件夹，`basic`, `database`, `app` 我们将以`<project>`表示。
 
@@ -61,13 +62,15 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 收费方式）, **请勿在生产区域部署 S3, DynamoDB**。防止 Region Down 之后，无法使用 Terraform。
 4. 在生产区域制作 AMI, 并拷贝到灾备区域。
 5. 将使用到的 SSL 证书提前导入 IAM。
-6. 修改 `<project>/terraform.tf` 和 `<project>/variables.tf`. **terraform.tf** 是状态信
+6. 修改 `<project>/index.tf` 和 `<project>/variables.tf`. **index.tf** 是状态信
 息保存的地方, 需要使用到之前提到的 DynamoDB 和 S3。**variables.tf** 是模板的变量, 根据实际情况修改。
 7. 配置好 AWS Credentials. 该 credentials 需要具备访问 S3, DynamoDB 及自动创建相关资源的权限。
 
-中国大陆地区执行 terraform init 下载 `aws provider` 会比较慢，可提前手动下载, 并解压到
-`<project>/.terraform/plugins/<arch>/` 目录下。`<arch>` 为本机的系统和CPU架构, 
+中国大陆地区执行 terraform init 下载 `aws provider` 会比较慢，可提前手动下载, 
+并解压到`<project>/.terraform/plugins/<arch>/` 目录下。`<arch>` 为本机的系统和CPU架构, 
 如 `darwin_amd64`, `linux_amd64`。
+
+**[>>>点击此处手动下载 Terraform AWS Provider<<<](https://releases.hashicorp.com/terraform-provider-aws/)**
 
 ### (可选)创建模拟生产环境
 
@@ -78,26 +81,26 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 
 **创建基础环境**
 
-1. 修改 `basic/variables.tf` 和 `basic/terraform.tf`
-2. 在 basic 目录下执行 `terraform init`
-3. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace. 
+1. 修改 `basic/variables.tf` 和 `basic/index.tf`
+1. 在 basic 目录下执行 `terraform init`
+1. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace. 
 我们使用 workspace 来区分是模拟生产环境或者灾备环境
-4. 执行 `terraform apply` 创建基础网络环境
+1. 执行 `terraform apply` 创建基础网络环境
 
-**创建数据库/对象存储资源**
+**创建数据库**
 
-1. 在模拟生产区域创建 S3 Bucket, 并启用 **versioning** 功能，用于存储 WordPress media 文件
-2. 修改 `database/variables.tf` 和 `database/terraform.tf`
-3. 在 database 目录下执行 `terraform init`
-4. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace. 
-5. 执行 `terraform apply` 创建数据库相关资源
+1. 修改 `database/variables.tf` 和 `database/index.tf`
+1. 在 database 目录下执行 `terraform init`
+1. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace. 
+1. 执行 `terraform apply` 创建数据库相关资源
 
 **创建应用层**
 
-1. 修改 `app/variables.tf` 和 `app/terraform.tf`
-2. 在 basic 目录下执行 `terraform init`
-3. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace. 
-4. 执行 `terraform apply` 创建基础网络环境
+1. 在模拟生产区域创建 S3 Bucket, 并启用 **versioning** 功能，用于存储 WordPress media 文件
+1. 修改 `app/variables.tf` 和 `app/index.tf`
+1. 在 app 目录下执行 `terraform init`
+1. 执行 `terraform workspace new prod` 创建模拟生产环境的 workspace
+1. 执行 `terraform apply` 创建APP相关资源
 
 
 ### 灾备环境准备工作
@@ -105,7 +108,7 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 我们需要提前在灾备环境创建基础网络架构，来使得灾难发生时可以快速切换。在使用以下脚本的时候
 注意参数的配置。推荐使用脚本创建，这样可以提高自动化的水平。
 
-如果已经在**创建模拟生产环境**中修改了 `terraform.tf` 文件，无需修改该文件。
+如果已经在**创建模拟生产环境**中修改了 `index.tf` 文件，无需修改该文件。
 
 **拷贝镜像**
 
@@ -114,7 +117,7 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 
 **创建基础环境**
 
-1. 修改 `basic/dr.tfvars` 和 `basic/terraform.tf`
+1. 修改 `basic/dr.tfvars` 和 `basic/index.tf`
 2. 在 basic 目录下执行 `terraform init`
 3. 执行 `terraform workspace new dr` 创建灾备环境的 workspace. 
 我们使用 workspace 来区分是模拟生产环境或者灾备环境
@@ -135,7 +138,6 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 
 **RDS 数据同步**
 
-
 1. 在生产区域中选中 RDS 实例，点击右上角 **Actions**, 选择 **Create read replica**。 
 如果该按钮显示为灰色，请先 **Take Snapshot**, 等快照创建完毕后，再创建跨区域只读副本
 1. 在 **Create read replica DB instance**页面，选择 **Destination region** 为灾备区域，
@@ -153,8 +155,8 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 
 **修改灾备应用脚本启动参数**
 
-1. 将跨区域只读库的 endpoint 更新到 **`basic/dr.tfvars`**
-1. 修改 **`basic/dr.tfvars`**, `basic/terraform.tf`(如之前未修改)
+1. 将跨区域只读库的 endpoint 更新到 **`app/dr.tfvars`**
+1. 修改 **`app/dr.tfvars`**, `app/index.tf`(如之前未修改)
 1. 在 app 目录下执行 `terraform init`
 1. 执行 `terraform workspace new dr` 创建灾备环境的 workspace. 
 
@@ -165,6 +167,8 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 > 强烈建议在完成数据同步之后，进行一次故障转移的演练。
 
 在灾难发生后，执行故障转移, 请确保 `app` 目录下的 terraform workspace 是 `dr`。
+可以通过 `terraform workspace list` 来确认当前 workspace, 或者通过 `terraform workspcae select dr`
+来切换到 `dr` workspace。
 
 1. 执行 `terraform apply --var-file=dr.tfvars` 来启动资源
 1. 在 灾备区域 RDS Console 将 RDS Instance 提升为 master （可与上一步同时执行)。在灾备区域 RDS 控制台选择实例，
@@ -181,6 +185,37 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 1. RDS 需要将原 region 的数据库拆除，并新建可读节点进行同步
 1. 找一个合适的时间，重启业务，让数据写入到原 region
 1. 切换DNS
+
+## 销毁演示环境
+
+可以通过以下步骤快速销毁演示环境。
+
+**销毁灾备环境**
+
+以下都是 `dr` terraform workspace
+
+1. 在灾备区域 AWS RDS 控制台删除数据库实例
+1. 在 app 目录下执行 `terraform destroy --var-file=dr.tf`
+1. 在 basic 目录下执行 `terraform destroy --var-file=dr.tf`
+
+**销毁演示生产环境**
+
+以下都是 `prod` terraform workspace, 可以通过 `terraform workspace select prod` 切换。
+
+1. 在 app 目录下执行 `terraform destory`
+1. 在 database 目录下执行 `terraform destroy`
+1. 在 basic 目录下执行 `terraform destory`
+
+如需要，可手动删除 WordPress Media 文件 S3 Bucket, 以及 Terraform backend.
+
+## 脚本故障排查
+
+**Terraform 故障排查**
+
+可以通过在 Terraform 命令之前添加环境变量，来使 Terraform 输出更多的日志信息来帮助故障排查，如:
+```
+TF_LOG=DEBUG terraform init
+```
 
 ## 费用
 以 ZHY 为灾备区域计费。
