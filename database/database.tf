@@ -5,7 +5,7 @@ resource "aws_db_parameter_group" "mysql56" {
 }
 
 resource "aws_db_instance" "mysql56" {
-  identifier = "dr-demo-prod"
+  identifier = "dr-demo"
   name = "demo"
   instance_class = "db.r4.large"
   allocated_storage = 20
