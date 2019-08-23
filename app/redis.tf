@@ -4,7 +4,7 @@ resource "aws_elasticache_parameter_group" "redis" {
 }
 
 resource "aws_elasticache_cluster" "redis" {
-  cluster_id           = "dr-demo-prod-redis"
+  cluster_id           = "dr-demo-redis"
   engine               = "redis"
   node_type            = "cache.t2.small"
   num_cache_nodes      = 1

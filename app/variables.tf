@@ -14,7 +14,7 @@ variable "app_s3" {
 
 # 必须改！
 variable "db_endpoint" {
-  default = "dr-demo-prod.c7gghk4aijib.rds.cn-north-1.amazonaws.com.cn"
+  default = "dr-demo.c7gghk4aijib.rds.cn-north-1.amazonaws.com.cn"
 }
 
 # 必须改! EC2 SSH Key name, 请登陆 AWS 控制台查看或者创建
