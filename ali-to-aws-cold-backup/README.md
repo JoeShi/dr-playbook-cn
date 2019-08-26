@@ -1,6 +1,6 @@
 # 灾备专题 - Aliyun to AWS Cold Backup
 
-该方案模拟在阿里云上的 WordPress cluster 应用 通过 Cold Backup 的方式备份到 AWS 宁夏区域。**RTO 和 RPO 目标均为 24 小时** 。   
+该方案模拟在阿里云上的WordPress cluster应用通过 **Cold Backup** 的方式备份到 AWS 宁夏区域。**RTO 和 RPO 目标均为 24 小时** 。   
 
 阿里云上的部署如下：
 
@@ -8,7 +8,8 @@
 * 云数据库版Redis: 使用 Redis Object Cache 插件，使得 WordPress 支持Redis 作为缓存
 * 对象存储OSS: WordPress 的文件存储在 OSS 上，通过 OSSFS (https://help.aliyun.com/document_detail/32196.html) 软件挂载到 ECS
 * 云服务器ECS: 安装 WordPress 应用，ECS 通过弹性伸缩服务实现自动伸缩
-* 负载均衡SLB: 作为负载均衡，将接收到的流量转发给后端的 WordPress 集群
+* 负载均衡SLB: 作为负载均衡，将接收到的流量转发给后端的 WordPress 集群   
+
 
 ## 架构
 
@@ -30,7 +31,7 @@
 1. Redis不含持久化数据，无需实现复制，只需script启动即可。
 1. 提前在宁夏区配置好网络环境，当灾难发生时，通过脚本启动资源；手动或者通过脚本自动导入 MySQL 数据
 
-恢复脚本及使用方法已上传到[lab798/aws-dr-samples](https://github.com/lab798/aws-dr-samples)。
+> 恢复脚本及使用方法已上传到[lab798/aws-dr-samples](https://github.com/lab798/aws-dr-samples)。
 
 
 ## 备份步骤
@@ -43,9 +44,9 @@
    ```
 
 * 将备份文件上传到 Amazon S3
-```
-aws s3 cp wordpress.sql s3://<your bucket>/<your prefix>/
-```
+   ```
+   aws s3 cp wordpress.sql s3://<your bucket>/<your prefix>/
+   ```
 ### 备份OSS的数据到AWS S3
 
 * 把OSS bucket 挂载到本地目录，参考 OSSFS 快速安装 (https://help.aliyun.com/document_detail/32196.html)。
@@ -53,7 +54,6 @@ aws s3 cp wordpress.sql s3://<your bucket>/<your prefix>/
    ```
    aws s3 sync <ossfs local folder> s3://<your bucket>/<your prefix>/
    ```
-
 
 * 可以把该命令放入上一步备份数据库的脚本中，完整的 backup.sh 脚本内容如下:
    ```
@@ -65,7 +65,7 @@ aws s3 cp wordpress.sql s3://<your bucket>/<your prefix>/
 
 ### 自动化备份
 
-编写cronjob，每天晚上定期执行backup.sh，比如下面的例子表示每天晚上10:30进行备份：
+* 编写cronjob，每天晚上定期执行backup.sh，比如下面的例子表示每天晚上10:30进行备份：
    ```buildoutcfg
    30 22 * * * /root/backup.sh
    ```
@@ -74,18 +74,17 @@ aws s3 cp wordpress.sql s3://<your bucket>/<your prefix>/
 
 冷备成本是指容灾region在灾备过程中所产生的成本，此成本具有时效性，同时和购买类型也有关系。
 
-以宁夏区为例，按照上述灾备方案，假定需要的灾备资源及产生的费用为：
+以 **宁夏区(ZHY)** 为例，按照上述灾备方案，假定需要的灾备资源及产生的费用为：
 
 * **AMI 20G**: 镜像文件在宁夏区存储的费用   
 * **S3 1T 不频繁访问**：由于是灾备访问，平时不会被使用，推荐不频繁访问
 
 | 服务                | 类型	       | 单价             | 1 年费用           |
-| :-----             | :-----      | :-----          | :-----             |
-| AMI 20GB            |    	       | 0.277/GB/月     |	66.48            |
-| S3 不频繁访问 1 TB   |	           | 0.1030029/GB/月 |	1265.7           |
-|                    |             |                 | 总价	1332.18       |
-|                    |             |                 | 含税总价	1412.1108 |
-
+| :-----              | :-----      | :-----          | :-----             |
+| AMI 20GB            |   EBS 	   | 0.277/GB/月     |	66.48 RMB            |
+| S3 不频繁访问 1 TB   |	  S3-IA    | 0.1030029/GB/月 |	1265.7 RMB           |
+| 总价                |             |                 | 	1332.18 RMB      |
+| 含税总价             |             |                 | 	1412.1108  RMB      |
 
 ## 注意事项
 
