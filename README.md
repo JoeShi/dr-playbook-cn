@@ -53,28 +53,21 @@ RPO (Recovery Point Objective，复原点目标)是指从系统和应用数据�
       <td>在灾备区按用量收费</td>
    </tr>
    <tr>
-      <td></td>
       <td>EC2</td>
       <td>根据实际使用的类型按灾备区定价收费</td>
-      <td></td>
    </tr>
    <tr>
-      <td></td>
       <td>EC2 AMI</td>
       <td>如果您使用由实例存储提供支持的 AMI，您需要为实例使用和在 Amazon S3 中存储 AMI 付费。使用由 Amazon EBS 支持的 AMI，您需要为实例使用、Amazon EBS 卷的存储和使用、以 Amazon EBS 快照形式存储 AMI 付费。</td>
-      <td></td>
+       
    </tr>
    <tr>
-      <td></td>
       <td>EBS快照</td>
-      <td>按EBS的快照存储大小收费</td>
-      <td></td>
+      <td>按EBS的快照存储大小收费</td>    
    </tr>
    <tr>
-      <td></td>
       <td>EBS 卷</td>
       <td>单独使用的EBS卷的容量费用</td>
-      <td></td>
    </tr>
    <tr>
       <td rowspan="5">应用层</td>
@@ -82,42 +75,29 @@ RPO (Recovery Point Objective，复原点目标)是指从系统和应用数据�
       <td>在灾备区按用量收费</td>
    </tr>
    <tr>
-      <td></td>
       <td>EC2</td>
       <td>根据实际使用的类型按灾备区定价收费</td>
-      <td></td>
    </tr>
    <tr>
-      <td></td>
       <td>EC2 AMI</td>
       <td>如果您使用由实例存储提供支持的 AMI，您需要为实例使用和在 Amazon S3 中存储 AMI 付费。使用由 Amazon EBS 支持的 AMI，您需要为实例使用、Amazon EBS 卷的存储和使用、以 Amazon EBS 快照形式存储 AMI 付费。</td>
-      <td></td>
    </tr>
-   <tr>
-      <td></td>
+   <tr> 
       <td>EBS快照</td>
       <td>按EBS的快照存储大小收费</td>
-      <td></td>
    </tr>
    <tr>
-      <td></td>
       <td>EBS 卷</td>
       <td>单独使用的EBS卷的容量费用</td>
-      <td></td>
    </tr>
    <tr>
       <td>缓存层</td>
       <td>Redis 备份文件</td>
-      <td></td>
    </tr>
    <tr>
-      <td></td>
-      <td></td>
       <td>ElastiCache 允许您免费为每个活动 Redis 集群存储一个备份。对于所有区域，其他备份的存储空间按每月 0.085 美元/GB 的费率收费。对于创建备份或者将备份中的数据还原到 Redis 集群，没有数据传输费。</td>
    </tr>
-   <tr>
-      <td></td>
-      <td></td>
+   <tr> 
       <td>拷贝到灾备区会产生备份文件存储费用</td>
    </tr>
    <tr>
@@ -126,16 +106,12 @@ RPO (Recovery Point Objective，复原点目标)是指从系统和应用数据�
       <td>实例费用按使用的EC2类型收费</td>
    </tr>
    <tr>
-      <td></td>
       <td>数据库存储</td>
       <td>按实际的数据量占用的空间收费</td>
-      <td></td>
    </tr>
    <tr>
-      <td></td>
       <td>数据库快照</td>
       <td>当灾备的数据库进行备份或快照时会产生存储费用</td>
-      <td></td>
    </tr>
    <tr>
       <td>S3对象存储</td>
