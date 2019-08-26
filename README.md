@@ -48,7 +48,7 @@ RPO (Recovery Point Objective，复原点目标)是指从系统和应用数据�
       <td>费用说明</td>
    </tr>
    <tr>
-      <td>Web层</td>
+      <td rowspan=5>Web层</td>
       <td>ELB</td>
       <td>在灾备区按用量收费</td>
    </tr>
@@ -77,7 +77,7 @@ RPO (Recovery Point Objective，复原点目标)是指从系统和应用数据�
       <td></td>
    </tr>
    <tr>
-      <td>应用层</td>
+      <td rowspan="5">应用层</td>
       <td>ELB</td>
       <td>在灾备区按用量收费</td>
    </tr>
@@ -121,7 +121,7 @@ RPO (Recovery Point Objective，复原点目标)是指从系统和应用数据�
       <td>拷贝到灾备区会产生备份文件存储费用</td>
    </tr>
    <tr>
-      <td>数据库层</td>
+      <td rowspan="3">数据库层</td>
       <td>数据库实例</td>
       <td>实例费用按使用的EC2类型收费</td>
    </tr>
