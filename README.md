@@ -43,9 +43,9 @@ RPO (Recovery Point Objective，复原点目标)是指从系统和应用数据�
 
 <table>
    <tr>
-      <td>功能</td>
-      <td>资源 </td>
-      <td>费用说明</td>
+      <th>功能</th>
+      <th>资源 </th>
+      <th>费用说明</th>
    </tr>
    <tr>
       <td rowspan=5>Web层</td>
