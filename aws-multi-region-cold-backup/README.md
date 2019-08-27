@@ -66,16 +66,15 @@ WordPress 媒体文件
 * AMI 20G: 镜像文件在宁夏区存储的费用
 * S3 1T 不频繁访问：由于是灾备访问，平时不会被使用，推荐不频繁访问
 * RDS Read Replica: 跨区域可读实例
-* 跨区域网络传输 2T: 包括S3 跨区域拷贝，Read Replica 跨区域复制等等
+* 跨区域网络传输 200G:  每月 200G S3 数据拷贝，含 WordPress 文件, AMI, DB Snapshot
 
 | 服务                    | 类型             | 单价            | 1 年价格 |
 | ----------------------- | ---------------- | --------------- | -------- |
 | AMI 20G                 |                  | 0.277/GB/月     | 66.48    |
 | S3 不频繁访问 1T        |                  | 0.1030029/GB/月 | 1265.7   |
-| RDS Read Replica        | db.m4.large 单AZ | 1.1733/小时     | 5540     |
-| Cross Region traffic 2T |                  | 0.6003/GB       | 1229.414 |
-|                         |                  | Total           | 8101.594 |
-|                         |                  | Total with tax  | 8587.69  |
+| 跨区域流量 200 G        |                  | 0.6003/GB       | 120.06     |
+|                         |                  | Total           | 1452.24 |
+|                         |                  | Total with tax  | 1539.3744  |
 
 *以上仅做参考，实际配置情况，应该根据工作负载合理配置。*
 
@@ -179,6 +178,27 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 **拷贝镜像**
 1. 在生产区域中选择 EC2, 创建镜像文件 
 1. 需要拷贝的镜像文件, 拷贝到灾备区域
+1. 在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
+![](../assets/copy-ami.png)
+1. 填入代码
+o	RDS版参数说明及代码
+在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
+o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
+o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
+然后选择右上角 保存。
+![](../assets/copy-ami.png)
+
+1. 添加IAM Role权限
+在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
+![](../assets/copy-ami.png)
+
+在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
+1. 添加触发器
+在该Lambda函数界面，选择 添加触发器。
+![](../assets/copy-ami.png)
+在 触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
+![](../assets/copy-ami.png)
+记录amiid
 
 **创建基础环境**
 1. 修改 `basic/dr.tfvars` 和 `basic/index.tf`
@@ -200,20 +220,32 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 开启 S3 Cross Region Replication 的更多资料，请参考[这里](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-crr.html#enable-crr-add-rule)。
 
 **RDS 数据同步**
-1. 在生产区域中选中 RDS 实例，点击右上角 **Actions**, 选择 **Create read replica**。 
-如果该按钮显示为灰色，请先 **Take Snapshot**, 等快照创建完毕后，再创建跨区域只读副本
-1. 在 **Create read replica DB instance**页面，选择 **Destination region** 为灾备区域，
-选择 **Destination DB subnet group** 为 **db-group**(在 basic 模板中自动创建)
-![](../assets/rds-crr.png)
-1. 根据需要，选择 **instance class** 和 **Multi-AZ deployment**
-1. 在 **Settings** 中 **DB instance identifier** 中输入数据库实例名称
-1. 其他设置保持默认, 选择 **Create read replica**，等待灾备区域的数据库实例启动完成
-1. 由于创建跨区域只读库无法选择安全组，因此我们需要手动跨区域只读节点的安全组。在 RDS Console 
-选择进入可读节点，选择右上角 **Modify**
-1. 在 **Network & Security** 选择 **DB_SG**(在 basic 模板中自动创建), 选择右下角 **Continue**
-![](../assets/change_sg.png)
-1. 在 **Scheduling of modifications** 选择 **Apply immediately**
-1. 选择 **Modify DB Instance**
+1、创建基础的Lambda
+在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
+![](../assets/crr-wizard-set-iam-role.png)
+1. 填入代码
+o	RDS版参数说明及代码
+在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
+o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
+o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
+然后选择右上角 保存。
+![](../assets/crr-wizard-set-iam-role.png)
+代码
+
+1. 添加IAM Role权限
+在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
+![](../assets/crr-wizard-set-iam-role.png)
+在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
+![](../assets/crr-wizard-set-iam-role.png)
+
+1. 添加触发器
+在该Lambda函数界面，选择 添加触发器。
+![](../assets/crr-wizard-set-iam-role.png)
+
+在 触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
+![](../assets/crr-wizard-set-iam-role.png)
+
+
 
 **修改灾备应用脚本启动参数**
 1. 将跨区域只读库的 endpoint 更新到 **`app/dr.tfvars`**
@@ -234,6 +266,23 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 1. 在 灾备区域 RDS Console 将 RDS Instance 提升为 master （可与上一步同时执行)。在灾备区域 RDS 控制台选择实例，
 点击 **Actions**, 选择 **Promote**，在弹出的对话中选择 **Continue**
 ![](../assets/rds_promote.png)
+5、故障的时候在灾备区域将快照还原为实例
+![](../assets/crr-wizard-set-iam-role.png)
+
+1.	在 Create read replica DB instance页面，选择 Destination region 为灾备区域，选择 Destination DB subnet group 为 db-group(在 basic 模板中自动创建)
+![](../assets/crr-wizard-set-iam-role.png)
+
+2.	根据需要，选择 instance class 和vpc
+3.	在 Settings 中 DB instance identifier 中输入数据库实例名称
+4.	其他设置保持默认, 选择还原数据库实例，等待灾备区域的数据库实例启动完成
+5.	记录endpoint
+6.	由于我们需要手动跨区域只读节点的安全组。在 RDS Console 选择进入可读节点，选择右上角 Modify
+7.	在 Network & Security 选择 DB_SG(在 basic 模板中自动创建), 选择右下角 Continue
+![](../assets/crr-wizard-set-iam-role.png)
+
+8.	在 Scheduling of modifications 选择 Apply immediately
+9.	选择 Modify DB Instance
+
 1. 测试。功能测试应该在之前测试过，这里主要测试连通性
 1. 切换 DNS
 
