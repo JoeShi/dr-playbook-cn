@@ -11,10 +11,10 @@
 
 ## 灾备架构
 
-![](../assets/aws-multi-region-pilot-light.png)
+![](../assets/multi-region-cold-backup.png)
 Solution
 
-部分闲置的AWS组件会给客户增加额外的成本，因此在整个方案中，除了VPC预配置和RDS热备外，其余所有的组件
+部分闲置的AWS组件会给客户增加额外的成本，因此在整个方案中，除了定期的备份外，其余所有的组件
 都是灾难发生后通过脚本动态创建，达到最小的Infra cost。当发生时，用户通过预先定义好的灾备脚本，在灾备
 区域快速构建 AWS 资源。
 
