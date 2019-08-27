@@ -18,29 +18,34 @@ Solution
 都是灾难发生后通过脚本动态创建，达到最小的Infra cost。当发生时，用户通过预先定义好的灾备脚本，在灾备
 区域快速构建 AWS 资源。
 
-**RDS MySQL 数据备份**
-RDS Mysql配置Cross Region Replica，实现数据库的异步复制。如何配置跨Region只读副本，请参考[文档](https://docs.aws.amazon.com/zh_cn/AmazonRDS/latest/UserGuide/USER_ReadRepl.html#USER_ReadRepl.XRgn)。
-当灾难发生后，通过提升只读副本为独立的数据库实例，使其能够执行正常的写入操作。在本方案中，会使用脚本实现
-提升只读副本的操作。
+## 解决方案
+由于是冷备，因此在整个方案中，除了网络基础架构预配置外，只做数据定期快照向灾备环境拷贝，其余所有的组件都是灾难发生后通过脚本动态创建，达到最小的 Infra cost。当灾备切换发生时，用户通过预先定义好的灾备脚本，在灾备区域快速构建 AWS 资源。
 
-**S3 Bucket 数据备份(WordPress Media File)**
-开启S3 Cross Region Replication，实现S3文件的跨Region自动复制。关于如何开启S3跨区域复制，
-请参考[文档](https://docs.aws.amazon.com/zh_cn/AmazonS3/latest/dev/crr.html)。
+### 数据库备份
+Amazon RDS 在数据库实例的备份窗口中创建数据库实例的自动备份。Amazon RDS 根据指定的备份保留时间保存数据库实例的自动备份。RDS 创建备份 (Snapshot) 的事件，现在会发送到 CloudWatch Event, 可以通过 CloudWatch Rule 触发 Lambda, 调用 AWS API 将新创建的 Snapshot 自动拷贝到灾备区域。
+![](../assets/rds-dr-archi.png)
 
-**应用镜像**
-当北京区域新建AMI后，需要把新建的AMI复制到宁夏区域。您可以手动触发[复制过程](https://docs.aws.amazon.com/zh_cn/AWSEC2/latest/UserGuide/CopyingAMIs.html)
-也可以通过脚本自动化整个过程，例如在CloudWatch Event中设定时任务，触发lambda捕捉某段时间内
-新建的AMI，通过简单的AWS api调用把新建的AMI复制到到宁夏区域。请根据项目实时性的需求为定时任务
-设定合适的执行频率。
+Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实例而不仅仅是单个数据库。可通过从该数据库快照还原来创建数据库实例。还原数据库实例时，需要提供用于还原的数据库快照的名称，然后提供还原后所新建的数据库实例的名称。无法从数据库快照还原到现有数据库实例；在还原时，将创建一个新的数据库实例。
 
-**应用配置**
-在EC2的启动配置中设置user-data，使EC2内应用程序在启动后能够获取所需的配置，例如RDS Mysql和
-Redis的endpoint等等。启动配置已经包含在灾难恢复的脚本中。
+![](../assets/rds-dr-restore.png)
 
-**灾备脚本**
-按照上述方案，在GitHub (https://github.com/lab798/aws-dr-samples)上提供了基于 
-Terraform (https://terraform.io/) 的可执行脚本，该套脚本可以帮助用户快速构建模拟生产环境和灾备环境。
-用户根据所需创建的资源写成脚本文件。执行脚本时，Terraform 通过调用 AWS API 来快速构建 AWS 资源。
+### 应用成AMI备份
+
+当北京区域新建AMI后，需要把新建的AMI复制到宁夏区域。您可以手动触发复制过程，也可以通过脚本自动化整个过程。
+
+![](../assets/copy-ami.png)
+
+自动备份解决方案：在 CloudWatch Event 中设定时任务，触发 Lambda 捕捉某段时间内新建的AMI，通过简单的 AWS API 调用把新建的AMI复制到到宁夏区域。请根据项目实时性的需求为定时任务设定合适的执行频率。
+
+WordPress 媒体文件
+
+静态文件及其它需要同步到灾备region的文件存放在S3上。开启S3 Cross Region Replication，实现S3文件的跨Region自动复制。关于如何开启S3跨区域复制，请参考 AWS S3 Cross Region Replication。S3 通过 S3FS 挂载到 EC2, 作为 WorkPress 媒体文件库。
+应用配置
+
+在EC2的启动配置中设置 user-data，使 EC2 内应用程序在启动后能够获取所需的配置，例如 RDS Mysql 和  Redis 的endpoint 等等。启动配置已经包含在灾难恢复的脚本中。
+灾备脚本
+
+按照上述方案，在GitHub上提供了基于 Terraform 的可执行脚本，该套脚本可以帮助用户快速构建灾备环境。用户根据所需创建的资源写成脚本文件。执行脚本时，Terraform 通过调用 AWS API 来快速构建 AWS 资源。
 
 在本方案中，设定Redis不包含持久化数据。因此无需实现复制，只需在灾难恢复时通过脚本创建新实例即可。
 
