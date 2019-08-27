@@ -9,8 +9,7 @@
 * ELB:  作为负载均衡，将接收到的流量转发给后端的 WordPress 集群
 * NAT Gateway: WordPress 经由 NAT 网关主动访问外网
 
-## 架构
-根据 Pilot Light 的需求，我们需要将 WordPress 的文件存储，和数据库异步同步到其他其他区域。架构图如下：
+## 灾备架构
 
 ![](../assets/aws-multi-region-pilot-light.png)
 Solution
