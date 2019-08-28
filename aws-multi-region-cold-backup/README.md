@@ -182,7 +182,7 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 本方案中我们会自动按时进行镜像制作并拷贝到灾备区域
 
 1. 在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
-![](../assets/copy-ami.png)
+![](../assets/ami_backup_lam_config.png)
 
 1. 填入代码
 o	RDS版参数说明及代码
@@ -190,19 +190,21 @@ o	RDS版参数说明及代码
 o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
 o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
 然后选择右上角 保存。
-![](../assets/copy-ami.png)
-
+```python
+   代码
+   ```
+![](../assets/ami_backup_lam_code_change.png)
 1. 添加IAM Role权限
 在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
-![](../assets/copy-ami.png)
+![](../assets/ami_backup_ami_config.png)
 
 在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
 1. 添加触发器
 在该Lambda函数界面，选择 添加触发器。
-![](../assets/copy-ami.png)
+![](../assets/ami_backup_lamb_trigger.png)
 在 触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
-![](../assets/copy-ami.png)
-记录amiid
+![](../assets/ami_backup_trigger_cloudwatch_config.png)
+
 
 **创建基础环境**
 1. 修改 `basic/dr.tfvars` 和 `basic/index.tf`
