@@ -186,12 +186,19 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 1. 在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
 ![](../assets/ami_backup_lam_config.png)
 1. 填入代码
-o	RDS版参数说明及代码
-在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
-o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)<br>
-o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
-然后选择右上角 保存。
-    ```
+
+
+   o	RDS版参数说明及代码
+   在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
+
+
+   o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
+
+
+   o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
+   然后选择右上角 保存。
+   ![](../assets/ami_backup_lam_code_change.png)
+   ```
        import json
        import boto3
        import time
@@ -219,9 +226,7 @@ o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者�
                'statusCode': 200,
                'body': json.dumps('Hello from Lambda!')
            }
-       ```
-![](../assets/ami_backup_lam_code_change.png)
-
+   ```
 1. 添加iam role 权限
 在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
 ![](../assets/ami_backup_ami_config.png)
