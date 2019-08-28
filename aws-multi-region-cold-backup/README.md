@@ -338,12 +338,18 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 ### 故障转移 
 > 强烈建议在完成数据同步之后，进行一次故障转移的演练。
 
-1. 执行basic的terraform的创建
-1. 故障的时候首先在灾备区域将快照还原为实例 如下图点击还原快照
-![](../assets/crr-wizard-set-iam-role.png)
+1. 创建基础环境
+1.	修改 basic/variables.tf 和 basic/index.tf
+2.	在 basic 目录下执行 terraform init
+3.	执行 terraform workspace new prod 创建 模拟生产环境的 workspace. 我们使用 workspace 来区分是模拟生产环境或者灾备环境
+4. 执行 terraform apply 创建基础网络环境
 
-1.	在 Create DB instance页面，选择 Destination region 为灾备区域，选择 Destination DB subnet group 为 db-group(在 basic 模板中自动创建)
-![](../assets/crr-wizard-set-iam-role.png)
+
+1. 在灾备区域将快照还原为实例 如下图点击还原快照
+![](../assets/rds_snapshot_promote.png)
+
+1.	在 Create DB instance页面，选择 Destination DB subnet group 为 db-group(在 basic 模板中自动创建)
+![](../assets/rds_snapshot_promote_config.png)
 
 2.	根据需要，vpc为DR(在 basic 模板中自动创建) 并根据需要选择instance class
 3.	在 Settings 中 DB instance identifier 中输入数据库实例名称
@@ -351,10 +357,18 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 5.	记录endpoint
 6.	由于我们需要手动修改数据库的安全组。在 RDS Console 选择进入数据库实例，选择右上角 Modify
 7.	在 Network & Security 选择 DB_SG(在 basic 模板中自动创建), 选择右下角 Continue
-![](../assets/crr-wizard-set-iam-role.png)
+![](../assets/rds_snapshot_promote_sg.png)
 
 8.	在 Scheduling of modifications 选择 Apply immediately
 9.	选择 Modify DB Instance
+
+修改灾备应用脚本启动参数
+1.	将跨区域只读库的 endpoint 更新到 app/dr.tfvars
+2.	修改 app/dr.tfvars, app/index.tf(如之前未修改)
+3.	在 app 目录下执行 terraform init
+4.	执行 terraform workspace new dr 创建灾备环境的 workspace. 
+修改灾备脚本参数时，要谨慎核对参数。
+
 1. 执行app的terraform的创建
 在灾难发生后，执行故障转移, 请确保 `app` 目录下的 terraform workspace 是 `dr`。
 可以通过 `terraform workspace list` 来确认当前 workspace, 或者通过 `terraform workspcae select dr`
