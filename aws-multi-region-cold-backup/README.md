@@ -224,7 +224,7 @@ o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者�
 开启 S3 Cross Region Replication 的更多资料，请参考[这里](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-crr.html#enable-crr-add-rule)。
 
 **RDS 数据同步**
-1、创建基础的Lambda
+1. 创建基础的Lambda
 在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
 ![](../assets/rds_backup_lam_config.png)
 1. 填入代码
