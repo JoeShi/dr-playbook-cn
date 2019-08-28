@@ -230,6 +230,8 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 1. 添加iam role 权限
 在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
 ![](../assets/ami_backup_ami_config.png)
+
+
 在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
 1. 添加触发器
 在该Lambda函数界面，选择 添加触发器。
