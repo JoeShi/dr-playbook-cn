@@ -37,7 +37,7 @@ Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实
 
 自动备份解决方案：在 CloudWatch Event 中设定时任务，触发 Lambda 捕捉某段时间内新建的AMI，通过简单的 AWS API 调用把新建的AMI复制到到宁夏区域。请根据项目实时性的需求为定时任务设定合适的执行频率。
 
-WordPress 媒体文件
+### WordPress 媒体文件
 
 静态文件及其它需要同步到灾备region的文件存放在S3上。开启S3 Cross Region Replication，实现S3文件的跨Region自动复制。关于如何开启S3跨区域复制，请参考 AWS S3 Cross Region Replication。S3 通过 S3FS 挂载到 EC2, 作为 WorkPress 媒体文件库。
 应用配置
@@ -51,7 +51,7 @@ WordPress 媒体文件
 
 当灾难发生后，按照以下顺序进行灾难恢复：
 
-1. 手动提升RDS只读副本为独立的数据库实例.
+1. 手动将RDS数据库快照还原为数据库实例.
 1. 执行脚本创建容灾集群。
 1. 进行健康检查，确定容灾集群能够正常运行。
 1. 执行DNS切换，把用户访问切换到容灾集群。
