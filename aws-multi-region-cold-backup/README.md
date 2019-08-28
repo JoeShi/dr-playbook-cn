@@ -234,11 +234,11 @@ o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
 o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
 然后选择右上角 保存。
 ![](../assets/rds_backup_code_change.png)
+
 代码
 
 1. 添加IAM Role权限
 在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
-![](../assets/crr-wizard-set-iam-role.png)
 在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
 ![](../assets/rds_backuo_lam_role.png)
 
