@@ -23,11 +23,11 @@ Solution
 
 ### 数据库备份
 Amazon RDS 在数据库实例的备份窗口中创建数据库实例的自动备份。Amazon RDS 根据指定的备份保留时间保存数据库实例的自动备份。RDS 创建备份 (Snapshot) 的事件，现在会发送到 CloudWatch Event, 可以通过 CloudWatch Rule 触发 Lambda, 调用 AWS API 将新创建的 Snapshot 自动拷贝到灾备区域。
-![](../assets/rds-dr-archi.png)
+![](../assets/rds_back_lam.png)
 
 Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实例而不仅仅是单个数据库。可通过从该数据库快照还原来创建数据库实例。还原数据库实例时，需要提供用于还原的数据库快照的名称，然后提供还原后所新建的数据库实例的名称。无法从数据库快照还原到现有数据库实例；在还原时，将创建一个新的数据库实例。
 
-![](../assets/rds-dr-restore.png)
+![](../assets/rds_restore.png)
 
 ### 应用成AMI备份
 
