@@ -188,40 +188,41 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 1. 填入代码
 o	RDS版参数说明及代码
 在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
-o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
+o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)<br>
 o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
 然后选择右上角 保存。
-```
-import json
-import boto3
-import time
+    ```
+       import json
+       import boto3
+       import time
 
-def lambda_handler(event, context):
-    # TODO implement
-    clientEC2 = boto3.client('ec2')
-    name='testami'+time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-    instanceId = "i-07a15e9a0d139ee5f"
-    response = clientEC2.create_image(
-        InstanceId=instanceId,
-        Name = name
-    )
-    ImageId=response['ImageId']
-    time.sleep(60)
-    clientbej = boto3.client('ec2','cn-north-1')
-    newname='bejtestami'+time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-    response = clientbej.copy_image(
-        Name=newname,
-        SourceImageId=ImageId,
-        SourceRegion='cn-northwest-1'
-    )
+       def lambda_handler(event, context):
+           # TODO implement
+           clientEC2 = boto3.client('ec2')
+           name='testami'+time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+           instanceId = "i-07a15e9a0d139ee5f"
+           response = clientEC2.create_image(
+               InstanceId=instanceId,
+               Name = name
+           )
+           ImageId=response['ImageId']
+           time.sleep(60)
+           clientbej = boto3.client('ec2','cn-north-1')
+           newname='bejtestami'+time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+           response = clientbej.copy_image(
+               Name=newname,
+               SourceImageId=ImageId,
+               SourceRegion='cn-northwest-1'
+           )
 
-    return {
-        'statusCode': 200,
-        'body': json.dumps('Hello from Lambda!')
-    }
-   ```
+           return {
+               'statusCode': 200,
+               'body': json.dumps('Hello from Lambda!')
+           }
+       ```
 ![](../assets/ami_backup_lam_code_change.png)
-1. 添加IAM Role权限
+
+1. 添加iam role 权限
 在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
 ![](../assets/ami_backup_ami_config.png)
 在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
