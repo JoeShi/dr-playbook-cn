@@ -238,17 +238,15 @@ o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者�
 ```python
    代码
    ```
-
 1. 添加IAM Role权限
 在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
 在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
 ![](../assets/rds_backuo_lam_role.png)
-
 1. 添加触发器
 在该Lambda函数界面，选择 添加触发器。
 ![](../assets/rds_backup_trigger.png)
 
-在 触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
+1. 在触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
 ![](../assets/rds_backup_cloudwatch_config.png)
 
 
