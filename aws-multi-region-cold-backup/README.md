@@ -228,18 +228,19 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
            }
    ```
 1. 添加iam role 权限
-在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
-![](../assets/ami_backup_ami_config.png)
+   在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
+   ![](../assets/ami_backup_ami_config.png)
 
 
-在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
+   在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
 1. 添加触发器
-在该Lambda函数界面，选择 添加触发器。
-![](../assets/ami_backup_lamb_trigger.png)
+   在该Lambda函数界面，选择 添加触发器。
+   ![](../assets/ami_backup_lamb_trigger.png)
 
 
-在 触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
-![](../assets/ami_backup_trigger_cloudwatch_config.png)
+1. 配置触发器
+   在 触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
+   ![](../assets/ami_backup_trigger_cloudwatch_config.png)
 
 
 **创建基础环境**
@@ -264,48 +265,55 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 **RDS 数据同步**
 1. 创建基础的Lambda
 在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
-![](../assets/rds_backup_lam_config.png)
+  ![](../assets/rds_backup_lam_config.png)
 1. 填入代码
-o	RDS版参数说明及代码
-在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
-o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
-o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
-然后选择右上角 保存。
-![](../assets/rds_backup_code_change.png)
+   o	RDS版参数说明及代码
+   
+   
+   在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
+   
+   
+   o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
+   
+   
+   o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称然后选择右上角 保存。
+   
+   
+   ![](../assets/rds_backup_code_change.png)
 
-```
-import boto3
-import time
-def lambda_handler(event, context):
-    MAX_SNAPSHOTS = 5
-    DB_INSTANCE_NAMES = ['your_db_name']
-    clientRDS = boto3.client('rds')
-    for DB_INSTANCE_NAME in DB_INSTANCE_NAMES:
-        db_snapshots = clientRDS.describe_db_snapshots(
-            SnapshotType='manual',
-            DBInstanceIdentifier= DB_INSTANCE_NAME
-        )['DBSnapshots']
-        for i in range(0, len(db_snapshots) - MAX_SNAPSHOTS + 1):
-            oldest_snapshot = db_snapshots[0]
-            for db_snapshot in db_snapshots:
-                if oldest_snapshot['SnapshotCreateTime'] > db_snapshot['SnapshotCreateTime']:
-                    oldest_snapshot = db_snapshot
-            clientRDS.delete_db_snapshot(DBSnapshotIdentifier=oldest_snapshot['DBSnapshotIdentifier'])
-            db_snapshots.remove(oldest_snapshot)
-        DBSnapshot=clientRDS.create_db_snapshot(
-            DBSnapshotIdentifier=DB_INSTANCE_NAME + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()),
-            DBInstanceIdentifier=DB_INSTANCE_NAME
-        )
-        newarn=DBSnapshot['DBSnapshot']['DBSnapshotArn']
-        bejclientRDS = boto3.client('rds','cn-north-1')
-        time.sleep(180)
-        response = bejclientRDS.copy_db_snapshot(
-            SourceDBSnapshotIdentifier=newarn,
-        TargetDBSnapshotIdentifier="rds_snapshot_bej"+ time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()),
-        SourceRegion='cn-northwest-1'
-        )
-        
    ```
+   import boto3
+   import time
+   def lambda_handler(event, context):
+       MAX_SNAPSHOTS = 5
+       DB_INSTANCE_NAMES = ['your_db_name']
+       clientRDS = boto3.client('rds')
+       for DB_INSTANCE_NAME in DB_INSTANCE_NAMES:
+           db_snapshots = clientRDS.describe_db_snapshots(
+               SnapshotType='manual',
+               DBInstanceIdentifier= DB_INSTANCE_NAME
+           )['DBSnapshots']
+           for i in range(0, len(db_snapshots) - MAX_SNAPSHOTS + 1):
+               oldest_snapshot = db_snapshots[0]
+               for db_snapshot in db_snapshots:
+                   if oldest_snapshot['SnapshotCreateTime'] > db_snapshot['SnapshotCreateTime']:
+                       oldest_snapshot = db_snapshot
+               clientRDS.delete_db_snapshot(DBSnapshotIdentifier=oldest_snapshot['DBSnapshotIdentifier'])
+               db_snapshots.remove(oldest_snapshot)
+           DBSnapshot=clientRDS.create_db_snapshot(
+               DBSnapshotIdentifier=DB_INSTANCE_NAME + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()),
+               DBInstanceIdentifier=DB_INSTANCE_NAME
+           )
+           newarn=DBSnapshot['DBSnapshot']['DBSnapshotArn']
+           bejclientRDS = boto3.client('rds','cn-north-1')
+           time.sleep(180)
+           response = bejclientRDS.copy_db_snapshot(
+               SourceDBSnapshotIdentifier=newarn,
+           TargetDBSnapshotIdentifier="rds_snapshot_bej"+ time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()),
+           SourceRegion='cn-northwest-1'
+           )
+
+      ```
 1. 添加IAM Role权限
 在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
 在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
@@ -330,11 +338,7 @@ def lambda_handler(event, context):
 ### 故障转移 
 > 强烈建议在完成数据同步之后，进行一次故障转移的演练。
 
-在灾难发生后，执行故障转移, 请确保 `app` 目录下的 terraform workspace 是 `dr`。
-可以通过 `terraform workspace list` 来确认当前 workspace, 或者通过 `terraform workspcae select dr`
-来切换到 `dr` workspace。
 
-1. 执行 `terraform apply --var-file=dr.tfvars` 来启动资源
 1. 在 灾备区域 RDS Console 将 RDS Instance 提升为 master （可与上一步同时执行)。在灾备区域 RDS 控制台选择实例，
 点击 **Actions**, 选择 **Promote**，在弹出的对话中选择 **Continue**
 ![](../assets/rds_promote.png)
@@ -355,6 +359,11 @@ def lambda_handler(event, context):
 8.	在 Scheduling of modifications 选择 Apply immediately
 9.	选择 Modify DB Instance
 
+在灾难发生后，执行故障转移, 请确保 `app` 目录下的 terraform workspace 是 `dr`。
+可以通过 `terraform workspace list` 来确认当前 workspace, 或者通过 `terraform workspcae select dr`
+来切换到 `dr` workspace。
+
+1. 执行 `terraform apply --var-file=dr.tfvars` 来启动资源
 1. 测试。功能测试应该在之前测试过，这里主要测试连通性
 1. 切换 DNS
 
