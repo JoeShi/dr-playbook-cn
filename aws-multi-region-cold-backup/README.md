@@ -190,8 +190,34 @@ o	RDS版参数说明及代码
 o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
 o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
 然后选择右上角 保存。
-```python
-   代码
+```
+import json
+import boto3
+import time
+
+def lambda_handler(event, context):
+    # TODO implement
+    clientEC2 = boto3.client('ec2')
+    name='testami'+time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    instanceId = "i-07a15e9a0d139ee5f"
+    response = clientEC2.create_image(
+        InstanceId=instanceId,
+        Name = name
+    )
+    ImageId=response['ImageId']
+    time.sleep(60)
+    clientbej = boto3.client('ec2','cn-north-1')
+    newname='bejtestami'+time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    response = clientbej.copy_image(
+        Name=newname,
+        SourceImageId=ImageId,
+        SourceRegion='cn-northwest-1'
+    )
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Lambda!')
+    }
    ```
 ![](../assets/ami_backup_lam_code_change.png)
 1. 添加IAM Role权限
@@ -237,8 +263,38 @@ o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者�
 然后选择右上角 保存。
 ![](../assets/rds_backup_code_change.png)
 
-```python
-   代码
+```
+import boto3
+import time
+def lambda_handler(event, context):
+    MAX_SNAPSHOTS = 5
+    DB_INSTANCE_NAMES = ['your_db_name']
+    clientRDS = boto3.client('rds')
+    for DB_INSTANCE_NAME in DB_INSTANCE_NAMES:
+        db_snapshots = clientRDS.describe_db_snapshots(
+            SnapshotType='manual',
+            DBInstanceIdentifier= DB_INSTANCE_NAME
+        )['DBSnapshots']
+        for i in range(0, len(db_snapshots) - MAX_SNAPSHOTS + 1):
+            oldest_snapshot = db_snapshots[0]
+            for db_snapshot in db_snapshots:
+                if oldest_snapshot['SnapshotCreateTime'] > db_snapshot['SnapshotCreateTime']:
+                    oldest_snapshot = db_snapshot
+            clientRDS.delete_db_snapshot(DBSnapshotIdentifier=oldest_snapshot['DBSnapshotIdentifier'])
+            db_snapshots.remove(oldest_snapshot)
+        DBSnapshot=clientRDS.create_db_snapshot(
+            DBSnapshotIdentifier=DB_INSTANCE_NAME + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()),
+            DBInstanceIdentifier=DB_INSTANCE_NAME
+        )
+        newarn=DBSnapshot['DBSnapshot']['DBSnapshotArn']
+        bejclientRDS = boto3.client('rds','cn-north-1')
+        time.sleep(180)
+        response = bejclientRDS.copy_db_snapshot(
+            SourceDBSnapshotIdentifier=newarn,
+        TargetDBSnapshotIdentifier="rds_snapshot_bej"+ time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()),
+        SourceRegion='cn-northwest-1'
+        )
+        
    ```
 1. 添加IAM Role权限
 在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
