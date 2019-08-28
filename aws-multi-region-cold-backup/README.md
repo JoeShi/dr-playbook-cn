@@ -33,7 +33,7 @@ Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实
 
 当北京区域新建AMI后，需要把新建的AMI复制到宁夏区域。您可以手动触发复制过程，也可以通过脚本自动化整个过程。
 
-![](../assets/copy-ami.png)
+![](../assets/ami_backup.png)
 
 自动备份解决方案：在 CloudWatch Event 中设定时任务，触发 Lambda 捕捉某段时间内新建的AMI，通过简单的 AWS API 调用把新建的AMI复制到到宁夏区域。请根据项目实时性的需求为定时任务设定合适的执行频率。
 
@@ -176,10 +176,14 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 如果已经在**创建模拟生产环境**中修改了 `index.tf` 文件，无需修改该文件。
 
 **拷贝镜像**
+手动操作方式为
 1. 在生产区域中选择 EC2, 创建镜像文件 
-1. 需要拷贝的镜像文件, 拷贝到灾备区域
+2. 拷贝的镜像文件, 拷贝到灾备区域
+本方案中我们会自动按时进行镜像制作并拷贝到灾备区域
+
 1. 在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
 ![](../assets/copy-ami.png)
+
 1. 填入代码
 o	RDS版参数说明及代码
 在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
@@ -222,28 +226,28 @@ o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者�
 **RDS 数据同步**
 1、创建基础的Lambda
 在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
-![](../assets/crr-wizard-set-iam-role.png)
+![](../assets/rds_backup_lam_config.png)
 1. 填入代码
 o	RDS版参数说明及代码
 在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
 o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
 o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
 然后选择右上角 保存。
-![](../assets/crr-wizard-set-iam-role.png)
+![](../assets/rds_backup_code_change.png)
 代码
 
 1. 添加IAM Role权限
 在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
 ![](../assets/crr-wizard-set-iam-role.png)
 在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
-![](../assets/crr-wizard-set-iam-role.png)
+![](../assets/rds_backuo_lam_role.png)
 
 1. 添加触发器
 在该Lambda函数界面，选择 添加触发器。
-![](../assets/crr-wizard-set-iam-role.png)
+![](../assets/rds_backup_trigger.png)
 
 在 触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
-![](../assets/crr-wizard-set-iam-role.png)
+![](../assets/rds_backup_cloudwatch_config.png)
 
 
 
