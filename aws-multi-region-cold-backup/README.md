@@ -234,6 +234,8 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 1. 添加触发器
 在该Lambda函数界面，选择 添加触发器。
 ![](../assets/ami_backup_lamb_trigger.png)
+
+
 在 触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
 ![](../assets/ami_backup_trigger_cloudwatch_config.png)
 
