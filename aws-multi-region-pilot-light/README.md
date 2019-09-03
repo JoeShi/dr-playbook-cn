@@ -1,5 +1,10 @@
 # AWS Multi-Region Pilot Light 灾备解决方案
 
+本文详细介绍了如何在AWS上实现跨区域的pilot light灾备方案，由于部分闲置的AWS组件会给客户增加额外的成本，因此在整个方案中，除了VPC预配置和RDS热备外，其余所有的组件
+都是灾难发生后通过脚本动态创建，达到最小的Infra cost。当发生灾难时，用户通过预先定义好的灾备脚本，在灾备
+区域快速构建 AWS 资源。
+
+## 前提假设
 该方案是模拟一个 WordPress cluster 部署在 AWS 上进行 multi-region pilot light 灾备的方案。生产区域组件选择如下：
 
 * RDS MySQL: WordPress 数据库
@@ -14,9 +19,7 @@
 
 ![](../assets/aws-multi-region-pilot-light.png)
 
-部分闲置的AWS组件会给客户增加额外的成本，因此在整个方案中，除了VPC预配置和RDS热备外，其余所有的组件
-都是灾难发生后通过脚本动态创建，达到最小的Infra cost。当发生时，用户通过预先定义好的灾备脚本，在灾备
-区域快速构建 AWS 资源。
+以下为各个组件的介绍。
 
 **RDS MySQL 数据备份**
 RDS Mysql配置Cross Region Replica，实现数据库的异步复制。如何配置跨Region只读副本，请参考[文档](https://docs.aws.amazon.com/zh_cn/AmazonRDS/latest/UserGuide/USER_ReadRepl.html#USER_ReadRepl.XRgn)。
@@ -257,7 +260,6 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 TF_LOG=DEBUG terraform init
 ```
 
-
 ## 注意事项和RPO说明
 1. S3 Cross Region Replication是以异步复制的方式进行。大多数对象会在 15 分钟内复制，
 但有时候可能需要两三个小时。极少数情况下，复制可能需要更长时间。因此，当进行灾难恢复时，
@@ -273,4 +275,7 @@ TF_LOG=DEBUG terraform init
 Template中EC2启动的镜像。如果您在北京区域对EC2进行了变更，请及时把北京区域的AMI复制到宁夏
 区域，以保证宁夏区域的AMI保持最新状态。
 
-
+## 总结
+本文详细介绍了如何在AWS上实现跨区域的pilot light灾备方案，并提供了terraform模板进行可行性验证。在整个方案中，除了VPC预配置和RDS热备外，其余所有的组件
+都是灾难发生后通过脚本动态创建，达到最小的Infra cost。当发生灾难时，用户通过预先定义好的灾备脚本，在灾备
+区域快速构建 AWS 资源。
