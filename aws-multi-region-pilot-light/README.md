@@ -120,8 +120,8 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
    > 由于 WordPress 会记录域名，请勿使用ELB的域名直接访问, 为 WordPress 配置自定义域名。
 1. 将使用到的 SSL 证书提前导入 IAM。
 1. 修改 `<project>/index.tf` 和 `<project>/variables.tf`.  `<project>`代表`basic`, `database`, `app`三个相应folder的泛指，请分别进行修改。
-  - **index.tf** 是状态信息保存的地方, 需要使用到之前提到的 DynamoDB 和 S3。
-  - **variables.tf** 是模板的变量, 根据实际情况修改。
+   - **index.tf** 是状态信息保存的地方, 需要使用到之前提到的 DynamoDB 和 S3。
+   - **variables.tf** 是模板的变量, 根据实际情况修改。
 1. 配置好 AWS Credentials. 该 credentials 需要具备访问 S3, DynamoDB 及自动创建相关资源的权限。
 1. 中国大陆地区执行 terraform init 下载 `aws provider` 会比较慢，可提前手动下载, 
 并解压到`<project>/.terraform/plugins/<arch>/` 目录下。`<arch>` 为本机的系统和CPU架构, 
