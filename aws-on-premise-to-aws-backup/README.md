@@ -1,4 +1,4 @@
-# 灾备专题 - AWS On-Premises Cold and Pilot Light
+# On-Premise to AWS Cold Backup & Pilot Light 容灾解决方案
 
 该方案是模拟一个 IT infrastructure 从 On-premises 到云的 Cold Backup 和 Pilot Light Backup。
 

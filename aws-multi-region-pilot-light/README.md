@@ -1,4 +1,4 @@
-# AWS 灾备解决方案
+# AWS Multi-Region Pilot Light 灾备解决方案
 
 该方案是模拟一个 WordPress cluster 部署在 AWS 上进行 multi-region pilot light 灾备的方案。生产区域组件选择如下：
 

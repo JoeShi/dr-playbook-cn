@@ -1,4 +1,4 @@
-# 灾备专题 - Aliyun to AWS Cold Backup
+# 阿里云 到 AWS Cold Backup 容灾解决方案
 
 该方案模拟在阿里云上的WordPress cluster应用通过 **Cold Backup** 的方式备份到 AWS 宁夏区域。**RTO 和 RPO 目标均为 24 小时** 。   
 
@@ -65,10 +65,10 @@
 
 ### 自动化备份
 
-* 编写cronjob，每天晚上定期执行backup.sh，比如下面的例子表示每天晚上10:30进行备份：
-   ```buildoutcfg
-   30 22 * * * /root/backup.sh
-   ```
+* 编写 cronjob，每天晚上定期执行 backup.sh，比如下面的例子表示每天晚上10:30进行备份：
+    ```shell script
+    30 22 * * * /root/backup.sh
+    ```
 
 ## 成本分析
 

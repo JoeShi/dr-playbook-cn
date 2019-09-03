@@ -1,4 +1,4 @@
-# AWS 灾备解决方案
+# AWS Multi-Region Cold Backup 灾备解决方案
 
 该方案是模拟一个 WordPress cluster 部署在 AWS 上进行 multi-region pilot light 灾备的方案。生产区域组件选择如下：
 
@@ -12,7 +12,6 @@
 ## 灾备架构
 
 ![](../assets/multi-region-cold-backup.png)
-
 
 ## 解决方案
 部分闲置的AWS组件会给客户增加额外的成本，由于是冷备，因此在整个方案中，除了网络基础架构预配置外，只做数据定期快照向灾备环境拷贝，其余所有的组件都是灾难发生后通过脚本动态创建，达到最小的 Infra cost。当灾备切换发生时，用户通过预先定义好的灾备脚本，在灾备区域快速构建 AWS 资源。
@@ -51,7 +50,6 @@ Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实
 1. 执行脚本创建容灾集群。
 1. 进行健康检查，确定容灾集群能够正常运行。
 1. 执行DNS切换，把用户访问切换到容灾集群。
-
 
 在 Step Guide 中描述了该方案的详细实施步骤和脚本运行执行过程。
 
@@ -117,9 +115,8 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 
 出于演示的目的，已经提前在 AWS 中国区域部署了 WordPress 5.2.2 版本的AMI. WordPress 应用程序位
 于 `/var/www/html` 目录下，可直接使用。
-* 北京区域 AMI: ami-0eebef1aaa174c852
-* 宁夏区域 AMI: ami-0cbbf10eaeaf0f9c3
-
+* 北京区域 AMI: `ami-0eebef1aaa174c852`
+* 宁夏区域 AMI: `ami-0cbbf10eaeaf0f9c3`
 
 ### 准备工作
 1. 提前提升好 limits. 每一项 AWS 服务都有 limits，确保灾备切换时，能否启动足够的资源来支撑应用。
@@ -314,6 +311,7 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
            )
 
       ```
+
 1. 添加IAM Role权限
 在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
 在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
