@@ -78,8 +78,8 @@ Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实
 
 1. 本文使用 AWS China Region, 如使用 AWS Global Region，需要修改镜像地址和 region 信息。
 1. 本文架构部署使用 [**Terraform**](https://www.terraform.io/) 一键部署AWS 资源，
-请在本机安装 **Terraform**, 并配置好[AWS Credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) 
-1. 该解决方案使用到 [Terraform S3 Backend](https://www.terraform.io/docs/backends/types/s3.html), 
+请在本机安装 **Terraform**, 并配置好[AWS Credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+1. 该解决方案使用到 [Terraform S3 Backend](https://www.terraform.io/docs/backends/types/s3.html),
 （可以修改为其他类型的 backend ）需要使用到 S3 Bucket 和 DynamoDB 用于存储状态信息，请提前创建 S3 Bucket 和 DynamoDB Table, 并且
 该 DynamoDB Table 的 primary key 必须为 `LockID`。
 1. 该实验以 WordPress 为例，由于 WordPress 会记录域名，请勿使用ELB的域名直接访问, 为 WordPress 配置自定义域名。
@@ -88,7 +88,7 @@ Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实
 - basic: 基础结构。可用于构建基础网络架构, 基础安全配置等等。 包含如下资源：
   * VPC
   * Subnet (包含 public subnet, private subnet)
-  * Security Group 
+  * Security Group
   * DB Subnet Group
   * Cache Subnet Group
   * Route Table
@@ -96,7 +96,7 @@ Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实
 - database: 数据库架构。用于自动创建 RDS 实例。包含如下资源：
   * Database Parameter Group
   * Database 实例
-  
+
 - app：应用相关资源。可用于自动构建缓存，应用及更新配置文件。包含如下资源:
   * Redis
   * Application Load Balancer
@@ -109,7 +109,7 @@ Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实
   * 自动生成配置文件
   * S3FS 自动挂载到 EC2 作为 WordPress 的 Media Library
 
-Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 Bucket 和一个 DynamoDB Table, 
+Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 Bucket 和一个 DynamoDB Table,
 该 DynamoDB 的 primary key 必须为 `LockID`，类型为 string。在本环境中，该 DynamoDB Table名称
 为`tf-state`。
 
@@ -124,7 +124,7 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 ### 准备工作
 1. 提前提升好 limits. 每一项 AWS 服务都有 limits，确保灾备切换时，能否启动足够的资源来支撑应用。
 1. 在本地安装 **Terraform** 工具 和 **AWS CLI**, 并且配置好 AWS Credentials.
-1. 创建用于存储 Terraform 状态的 S3 和 DynamoDB（由于使用的很少，DynamoDB 建议使用 On-Demand 
+1. 创建用于存储 Terraform 状态的 S3 和 DynamoDB（由于使用的很少，DynamoDB 建议使用 On-Demand
 收费方式）, **请勿在生产区域部署 S3, DynamoDB**。防止 Region Down 之后，无法使用 Terraform。
 1. 在生产区域制作 AMI, 并拷贝到灾备区域。
 1. 将使用到的 SSL 证书提前导入 IAM。
@@ -132,8 +132,8 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 息保存的地方, 需要使用到之前提到的 DynamoDB 和 S3。**variables.tf** 是模板的变量, 根据实际情况修改。
 1. 配置好 AWS Credentials. 该 credentials 需要具备访问 S3, DynamoDB 及自动创建相关资源的权限。
 
-中国大陆地区执行 terraform init 下载 `aws provider` 会比较慢，可提前手动下载, 
-并解压到`<project>/.terraform/plugins/<arch>/` 目录下。`<arch>` 为本机的系统和CPU架构, 
+中国大陆地区执行 terraform init 下载 `aws provider` 会比较慢，可提前手动下载,
+并解压到`<project>/.terraform/plugins/<arch>/` 目录下。`<arch>` 为本机的系统和CPU架构,
 如 `darwin_amd64`, `linux_amd64`。
 
 **[>>>点击此处手动下载 Terraform AWS Provider<<<](https://releases.hashicorp.com/terraform-provider-aws/)**
@@ -147,14 +147,14 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 **创建基础环境**
 1. 修改 `basic/variables.tf` 和 `basic/index.tf`
 1. 在 basic 目录下执行 `terraform init`
-1. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace. 
+1. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace.
 我们使用 workspace 来区分是模拟生产环境或者灾备环境
 1. 执行 `terraform apply` 创建基础网络环境
 
 **创建数据库**
 1. 修改 `database/variables.tf` 和 `database/index.tf`
 1. 在 database 目录下执行 `terraform init`
-1. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace. 
+1. 执行 `terraform workspace new prod` 创建 模拟生产环境的 workspace.
 1. 执行 `terraform apply` 创建数据库相关资源
 
 **创建应用层**
@@ -177,7 +177,7 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 手动操作方式为
 
 
-1. 在生产区域中选择 EC2, 创建镜像文件 
+1. 在生产区域中选择 EC2, 创建镜像文件
 2. 拷贝的镜像文件, 拷贝到灾备区域
 
 
@@ -188,14 +188,14 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 1. 填入代码
 
 
-   o	RDS版参数说明及代码
+   - RDS版参数说明及代码
    在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
 
 
-   o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
+   - 第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
 
 
-   o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
+   - 第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称
    然后选择右上角 保存。
    ![](../assets/ami_backup_lam_code_change.png)
    ```
@@ -227,18 +227,17 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
                'body': json.dumps('Hello from Lambda!')
            }
    ```
-1. 添加iam role 权限
+1. 添加iam role 权限 
+
    在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
    ![](../assets/ami_backup_ami_config.png)
-
-
    在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
 1. 添加触发器
-   在该Lambda函数界面，选择 添加触发器。
+
+   在该Lambda函数界面，选择 添加触发器
    ![](../assets/ami_backup_lamb_trigger.png)
-
-
 1. 配置触发器
+
    在 触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
    ![](../assets/ami_backup_trigger_cloudwatch_config.png)
 
@@ -246,13 +245,13 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 **创建基础环境**
 1. 修改 `basic/dr.tfvars` 和 `basic/index.tf`
 1. 在 basic 目录下执行 `terraform init`
-1. 执行 `terraform workspace new dr` 创建灾备环境的 workspace. 
+1. 执行 `terraform workspace new dr` 创建灾备环境的 workspace.
 我们使用 workspace 来区分是模拟生产环境或者灾备环境
 1. 执行 `terraform apply --var-file=dr.tfvars` 创建基础网络环境
 
 **S3 数据同步**
 1. 在灾备区域中创建 S3 Bucket, 并启用 **versioning** 功能，用于备份 WordPress 的 Media 文件
-1. 利用 AWS CLI 将已存在的文件拷贝到灾备区域，`aws s3 sync s3://SOURCE_BUCKET_NAME s3://TARGET_BUCKET_NAME` 
+1. 利用 AWS CLI 将已存在的文件拷贝到灾备区域，`aws s3 sync s3://SOURCE_BUCKET_NAME s3://TARGET_BUCKET_NAME`
 1. 在 S3 Console 中选择生产区域的 S3 Bucket, 点击 **Management**, 选择 **Replication**
 1. 点击 **Add Rule**, 选择 **Entire bucket**, 并点击 **Next**
 1. 选择在灾备区域中选择的目标桶，点击 **Next**
@@ -264,21 +263,15 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 
 **RDS 数据同步**
 1. 创建基础的Lambda
-在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
-  ![](../assets/rds_backup_lam_config.png)
+
+   在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
+   ![](../assets/rds_backup_lam_config.png)
 1. 填入代码
-   o	RDS版参数说明及代码
-   
-   
-   在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
-   
-   
-   o	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
-   
-   
-   o	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称然后选择右上角 保存。
-   
-   
+   -	RDS版参数说明及代码
+
+        在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
+         -	   第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
+         -	   第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称然后选择右上角 保存
    ![](../assets/rds_backup_code_change.png)
 
    ```
@@ -312,17 +305,21 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
            TargetDBSnapshotIdentifier="rds_snapshot_bej"+ time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()),
            SourceRegion='cn-northwest-1'
            )
+   ```
 
-      ```
+      
 1. 添加IAM Role权限
-在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
-在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
-![](../assets/rds_backuo_lam_role.png)
-1. 添加触发器
-在该Lambda函数界面，选择 添加触发器。
-![](../assets/rds_backup_trigger.png)
 
-1. 在触发器配置 中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
+    在下方 执行界面 中，点击 查看your_iam_role角色 , 进入该角色的摘要中。
+    在 摘要界面 中，选择 附加策略 ，AmazonRDSFullAcess。
+![](../assets/rds_backuo_lam_role.png)
+
+1. 添加触发器
+
+    在该Lambda函数界面，选择 添加触发器。
+    ![](../assets/rds_backup_trigger.png)
+
+1. 在触发器配置中，选择 CloudWatch Events，规则选择 创建新规则 ，规则类型 选择 计划表达式，按规则填入(e.g. 每两小时则为rate(2 hours), 详情参见规则的计划表达式)
 ![](../assets/rds_backup_cloudwatch_config.png)
 
 
@@ -331,11 +328,11 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
 1. 将跨区域只读库的 endpoint 更新到 **`app/dr.tfvars`**
 1. 修改 **`app/dr.tfvars`**, `app/index.tf`(如之前未修改)
 1. 在 app 目录下执行 `terraform init`
-1. 执行 `terraform workspace new dr` 创建灾备环境的 workspace. 
+1. 执行 `terraform workspace new dr` 创建灾备环境的 workspace.
 
 修改灾备脚本参数时，要谨慎核对参数。
 
-### 故障转移 
+### 故障转移
 > 强烈建议在完成数据同步之后，进行一次故障转移的演练。
 
 1. 创建基础环境
@@ -367,7 +364,7 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
    1. 修改灾备应用脚本启动参数 包括拷贝到备用区域的ami-id 新启用的数据库实例endpoint等 在dr.tfvar文件中
    2.	修改 app/dr.tfvars, app/index.tf(如之前未修改)
    3.	在 app 目录下执行 terraform init
-   4.	执行 terraform workspace new dr 创建灾备环境的 workspace. 
+   4.	执行 terraform workspace new dr 创建灾备环境的 workspace.
    修改灾备脚本参数时，要谨慎核对参数。
    5. 执行app的terraform的创建
    在灾难发生后，执行故障转移, 请确保 `app` 目录下的 terraform workspace 是 `dr`。
@@ -375,7 +372,7 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
    来切换到 `dr` workspace。
 
    6. 执行 `terraform apply --var-file=dr.tfvars` 来启动资源
-   
+
 1. 测试。功能测试应该在之前测试过，这里主要测试连通性
 1. 切换 DNS
 
