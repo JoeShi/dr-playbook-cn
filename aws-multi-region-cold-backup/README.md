@@ -270,8 +270,8 @@ Terraform 可以将信息存储在 S3 和 DynamoDB 中，请先根据一个 S3 B
    -	RDS版参数说明及代码
 
         在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
-         -	   第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
-         -	   第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称然后选择右上角 保存
+         -	第四行 MAX_SNAPSHOTS : 您想保存最大的副本数量(最大100)
+         -	第五行 DB_INSTANCE_NAME ：您想应用该脚本的RDS实例名称, 或者一组名称然后选择右上角 保存
    ![](../assets/rds_backup_code_change.png)
 
    ```
