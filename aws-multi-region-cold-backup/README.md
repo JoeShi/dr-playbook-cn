@@ -59,7 +59,6 @@ Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实
 接下来，我们会详细描述该方案的实施步骤和脚本运行执行过程。
 
 ## 价格
-
 以宁夏区为例，按照上述灾备方案，假定需要的灾备资源及产生的费用为：
 
 * AMI 20G: 镜像文件在宁夏区存储的费用
@@ -78,7 +77,8 @@ Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实
 
 > 以上仅做参考，实际配置情况，应该根据工作负载合理配置。   
 
-## terraform目录结构
+## 详细步骤
+### terraform目录结构
 terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取。   
 项目内有三个文件夹，`basic`, `database`, `app` 。以下为此repo的目录说明。
 - basic: 基础结构。可用于构建基础网络架构, 基础安全配置等等。 包含如下资源：
@@ -358,14 +358,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 1. 找一个合适的时间，重启业务，让数据写入到原 region
 1. 切换DNS
 
-## 脚本故障排查
-**Terraform 故障排查**
-可以通过在 Terraform 命令之前添加环境变量，来使 Terraform 输出更多的日志信息来帮助故障排查，如:
-```
-TF_LOG=DEBUG terraform init
-```
-
-## （可选）销毁演示环境
+### （可选）销毁演示环境
 可以通过以下步骤快速销毁演示环境。
 
 **销毁灾备环境**
@@ -383,6 +376,12 @@ TF_LOG=DEBUG terraform init
 
 如需要，可手动删除 WordPress Media 文件 S3 Bucket, 以及 Terraform backend.
 
+### 脚本故障排查
+**Terraform 故障排查**
+可以通过在 Terraform 命令之前添加环境变量，来使 Terraform 输出更多的日志信息来帮助故障排查，如:
+```
+TF_LOG=DEBUG terraform init
+```
 
 ## 注意事项和RPO说明
 1. S3 Cross Region Replication是以异步复制的方式进行。大多数对象会在 15 分钟内复制，

@@ -13,7 +13,6 @@
 根据 Pilot Light 的需求，我们需要将 WordPress 的文件存储，和数据库异步同步到其他其他区域。架构图如下：
 
 ![](../assets/aws-multi-region-pilot-light.png)
-Solution
 
 部分闲置的AWS组件会给客户增加额外的成本，因此在整个方案中，除了VPC预配置和RDS热备外，其余所有的组件
 都是灾难发生后通过脚本动态创建，达到最小的Infra cost。当发生时，用户通过预先定义好的灾备脚本，在灾备
@@ -74,7 +73,8 @@ Redis的endpoint等等。启动配置已经包含在灾难恢复的脚本中。
 
 *以上仅做参考，实际配置情况，应该根据工作负载合理配置。*
 
-## terraform目录结构
+## 详细步骤
+### terraform目录结构
 terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取。
 项目内有三个文件夹，`basic`, `database`, `app`。 
 - basic: 基础结构。可用于构建基础网络架构, 基础安全配置等等。 包含如下资源：
@@ -228,7 +228,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 1. 找一个合适的时间，重启业务，让数据写入到原 region
 1. 切换DNS
 
-## （可选）销毁演示环境
+### （可选）销毁演示环境
 可以通过以下步骤快速销毁演示环境。
 
 **销毁灾备环境**
@@ -249,7 +249,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 
 如需要，可手动删除 WordPress Media 文件 S3 Bucket, 以及 Terraform backend.
 
-## 脚本故障排查
+### 脚本故障排查
 **Terraform 故障排查**
 
 可以通过在 Terraform 命令之前添加环境变量，来使 Terraform 输出更多的日志信息来帮助故障排查，如:
@@ -257,8 +257,8 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 TF_LOG=DEBUG terraform init
 ```
 
-## 注意事项和RPO说明
 
+## 注意事项和RPO说明
 1. S3 Cross Region Replication是以异步复制的方式进行。大多数对象会在 15 分钟内复制，
 但有时候可能需要两三个小时。极少数情况下，复制可能需要更长时间。因此，当进行灾难恢复时，
 您需要关注部分没有得到复制的数据对您业务所造成的影响，并做出相应的调整。
