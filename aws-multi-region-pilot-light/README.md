@@ -76,8 +76,7 @@ Redis的endpoint等等。启动配置已经包含在灾难恢复的脚本中。
 
 *以上仅做参考，实际配置情况，应该根据工作负载合理配置。*
 
-## 详细步骤
-### terraform目录结构
+## terraform脚本目录
 terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取。
 项目内有三个文件夹，`basic`, `database`, `app`。 
 - basic: 基础结构。可用于构建基础网络架构, 基础安全配置等等。 包含如下资源：
@@ -105,7 +104,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
   * S3FS 自动挂载到 EC2 作为 WordPress 的 Media Library
 
 
-### 准备工作
+## 准备工作
 1. 本文使用 AWS China Region, 如使用 AWS Global Region，需要修改镜像地址和 region 信息。
 1. 提前提升好 limits. 每一项 AWS 服务都有 limits，确保灾备切换时，能否启动足够的资源来支撑应用。
 1. 本文架构部署使用 [**Terraform**](https://www.terraform.io/) 一键部署AWS 资源，
@@ -113,12 +112,12 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 1. Terraform 可以将信息存储在 S3 和 DynamoDB 中，创建用于存储 Terraform 状态的 S3 Bucket和 DynamoDB Table（由于使用的很少，DynamoDB 建议使用 On-Demand 
 收费方式）, 该 DynamoDB 的 primary key 必须为 `LockID`，类型为 string。在本环境中，该 DynamoDB Table名称
 为`tf-state`。
-   >Note: **请勿在生产区域部署 S3, DynamoDB**，防止 Region Down 之后，无法使用 Terraform。
+   > **请勿在生产区域部署 S3, DynamoDB**，防止 Region Down 之后，无法使用 Terraform。
 1. 在生产区域制作 AMI, 并拷贝到灾备区域。
 出于演示的目的，已经提前在 AWS 中国区域部署了 WordPress 5.2.2 版本的AMI. WordPress 应用程序位 于 /var/www/html 目录下，可直接使用。
    - 北京区域 AMI: ami-0eebef1aaa174c852
    - 宁夏区域 AMI: ami-0cbbf10eaeaf0f9c3
->Note: 由于 WordPress 会记录域名，请勿使用ELB的域名直接访问, 为 WordPress 配置自定义域名。
+   > 由于 WordPress 会记录域名，请勿使用ELB的域名直接访问, 为 WordPress 配置自定义域名。
 1. 将使用到的 SSL 证书提前导入 IAM。
 1. 修改 `<project>/index.tf` 和 `<project>/variables.tf`.  `<project>`代表`basic`, `database`, `app`三个相应folder的泛指，请分别进行修改。
   - **index.tf** 是状态信息保存的地方, 需要使用到之前提到的 DynamoDB 和 S3。
@@ -129,7 +128,8 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 如 `darwin_amd64`, `linux_amd64`。
 **[>>>点击此处手动下载 Terraform AWS Provider<<<](https://releases.hashicorp.com/terraform-provider-aws/)**
 
-### (可选)创建模拟生产环境
+## 详细步骤
+### 1. (可选)创建模拟生产环境
 > 如果对现有生产环境进行操作，直接跳过此步骤。
 
 该步骤创建模拟的生产环境，用于演示。可以选择手动创建，或者利用脚本快速创建。使用脚本的好处是，
@@ -156,11 +156,11 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 1. 执行 `terraform apply` 创建APP相关资源
 
 
-### 灾备环境准备工作
+### 2. 灾备环境准备工作
 我们需要提前在灾备环境创建基础网络架构，来使得灾难发生时可以快速切换。在使用以下脚本的时候
 注意参数的配置。推荐使用脚本创建，这样可以提高自动化的水平。
 
-如果已经在**创建模拟生产环境**中修改了 `index.tf` 文件，无需修改该文件。
+如果已经在创建模拟生产环境中修改了 `index.tf` 文件，无需修改该文件。
 
 **拷贝镜像**
 1. 在生产区域中选择 EC2, 创建镜像文件 
@@ -182,8 +182,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 1. 在 IAM Role 中选择 **Create new role**, 输入 **Rule name**, 选择 **Next**。
 ![](../assets/crr-wizard-set-iam-role.png)
 1. 选择 **Save** 保存复制规则。
-
-> 有关于开启 S3 Cross Region Replication 的更多资料，请参考[这里](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-crr.html#enable-crr-add-rule)。
+ > 有关于开启 S3 Cross Region Replication 的更多资料，请参考[这里](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-crr.html#enable-crr-add-rule)。
 
 **RDS 数据同步**
 1. 在生产区域中选中 RDS 实例，点击右上角 **Actions**, 选择 **Create read replica**。 
@@ -209,7 +208,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 
 修改灾备脚本参数时，要谨慎核对参数。
 
-### 故障转移 
+### 3. 故障转移 
 > 强烈建议在完成数据同步之后，进行一次故障转移的演练。
 
 在灾难发生后，执行故障转移, 请确保 `app` 目录下的 terraform workspace 是 `dr`。
@@ -223,7 +222,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 1. 测试。功能测试应该在之前测试过，这里主要测试连通性
 1. 切换 DNS
 
-### 灾后恢复
+### 4. 灾后恢复
 灾后恢复请务必咨询架构师！
 
 1. S3 的数据可以通过 **AWS CLI Sync** 命令来完成
@@ -231,7 +230,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 1. 找一个合适的时间，重启业务，让数据写入到原 region
 1. 切换DNS
 
-### （可选）销毁演示环境
+### 5.（可选）销毁演示环境
 可以通过以下步骤快速销毁演示环境。
 
 **销毁灾备环境**
@@ -252,7 +251,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 
 如需要，可手动删除 WordPress Media 文件 S3 Bucket, 以及 Terraform backend.
 
-### 脚本故障排查
+## 脚本故障排查
 **Terraform 故障排查**
 
 可以通过在 Terraform 命令之前添加环境变量，来使 Terraform 输出更多的日志信息来帮助故障排查，如:

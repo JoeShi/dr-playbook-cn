@@ -76,9 +76,7 @@ Amazon RDS 创建数据库实例的存储卷快照，并备份整个数据库实
 
 > 以上仅做参考，实际配置情况，应该根据工作负载合理配置。   
 
-
-## 详细步骤
-### terraform目录结构
+## terraform目录结构
 terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取。   
 项目内有三个文件夹，`basic`, `database`, `app` 。以下为此repo的目录说明。
 
@@ -106,7 +104,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
   * 自动生成配置文件
   * S3FS 自动挂载到 EC2 作为 WordPress 的 Media Library
 
-### 准备工作
+## 准备工作
 1. 本文使用 AWS China Region, 如使用 AWS Global Region，需要修改镜像地址和 region 信息。
 1. 提前提升好 limits. 每一项 AWS 服务都有 limits，确保灾备切换时，能否启动足够的资源来支撑应用。
 1. 本文架构部署使用 [**Terraform**](https://www.terraform.io/) 一键部署AWS 资源，
@@ -131,7 +129,8 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 **[>>>点击此处手动下载 Terraform AWS Provider<<<](https://releases.hashicorp.com/terraform-provider-aws/)**
 
 
-### (可选)创建模拟生产环境
+## 详细步骤
+### 1. (可选)创建模拟生产环境
 > Note: 如果对现有生产环境进行操作，直接跳过此步骤。
 
 该步骤创建模拟的生产环境，用于演示。可以选择手动创建，或者利用脚本快速创建。使用脚本的好处是，
@@ -158,7 +157,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 1. 执行 `terraform apply` 创建APP相关资源
 
 
-### 灾备环境准备工作
+### 2. 灾备环境准备工作
 我们需要提前在灾备环境创建基础网络架构，来使得灾难发生时可以快速切换。在使用以下脚本的时候
 注意参数的配置。推荐使用脚本创建，这样可以提高自动化的水平。
 
@@ -307,7 +306,7 @@ RDS默认每24h在备份时段打一次快照，本章节介绍如何自定义�
 
 修改灾备脚本参数时，要谨慎核对参数。
 
-### 故障转移
+### 3. 故障转移
 > 强烈建议在完成数据同步之后，进行一次故障转移的演练。
 
 1. **创建基础环境**   
@@ -344,14 +343,14 @@ RDS默认每24h在备份时段打一次快照，本章节介绍如何自定义�
 1. 测试。功能测试应该在之前测试过，这里主要测试连通性
 1. **切换 DNS**
 
-### 灾后恢复     
+### 4. 灾后恢复     
 灾后恢复请务必咨询架构师！
 1. S3 的数据可以通过 **AWS CLI Sync** 命令来完成
 1. RDS 需要将原 region 的数据库拆除，并新建可读节点进行同步
 1. 找一个合适的时间，重启业务，让数据写入到原 region
 1. 切换DNS
 
-### （可选）销毁演示环境     
+### 5. （可选）销毁演示环境     
 可以通过以下步骤快速销毁演示环境。
 
 1. **销毁灾备环境**    
@@ -368,7 +367,7 @@ RDS默认每24h在备份时段打一次快照，本章节介绍如何自定义�
 
 1. 如需要，可手动删除 WordPress Media 文件 S3 Bucket, 以及 Terraform backend.
 
-### 脚本故障排查    
+## 脚本故障排查    
 **Terraform 故障排查**         
 可以通过在 Terraform 命令之前添加环境变量，来使 Terraform 输出更多的日志信息来帮助故障排查，如:
 ```
