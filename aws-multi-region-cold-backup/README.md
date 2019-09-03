@@ -118,7 +118,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 出于演示的目的，已经提前在 AWS 中国区域部署了 WordPress 5.2.2 版本的AMI. WordPress 应用程序位 于 /var/www/html 目录下，可直接使用。
    - 北京区域 AMI: ami-0eebef1aaa174c852
    - 宁夏区域 AMI: ami-0cbbf10eaeaf0f9c3
->Note: 由于 WordPress 会记录域名，请勿使用ELB的域名直接访问, 为 WordPress 配置自定义域名。
+   >Note: 由于 WordPress 会记录域名，请勿使用ELB的域名直接访问, 为 WordPress 配置自定义域名。
 1. 将使用到的 SSL 证书提前导入 IAM。
 1. 修改 `<project>/index.tf` 和 `<project>/variables.tf`.  `<project>`代表`basic`, `database`, `app`三个相应folder的泛指，请分别进行修改。
   - **index.tf** 是状态信息保存的地方, 需要使用到之前提到的 DynamoDB 和 S3。
@@ -174,9 +174,8 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
    1. 在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
      ![](../assets/ami_backup_lam_config.png)
    1. 填入代码
-   
-   - RDS版参数说明及代码
-   在该Lambda函数界面中，将以下代码粘贴进函数代码中，修改参数：
+  
+   在该Lambda函数界面中，将以下代码粘贴进函数代码中，并修改RDS相关参数：
       ![](../assets/ami_backup_lam_code_change.png)
       
        ```
@@ -241,7 +240,8 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 
 > 开启 S3 Cross Region Replication 的更多资料，请参考[这里](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-crr.html#enable-crr-add-rule)。
 
-**RDS 数据同步**
+**RDS 数据备份**
+RDS默认每24h在备份时段打一次快照，本章节介绍如何自定义备份时间间距（如每2h）并通过serverless的方式自动化打快照。
 
 1. 创建基础的Lambda
 在Lambda创建界面，选择 从头开始创作，运行语言选择Python3.7。 在 权限 - 执行角色 中选择 创建具有基本Lambda权限的角色
