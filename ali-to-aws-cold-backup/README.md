@@ -6,7 +6,7 @@
 
 * RDS MySQL: WordPress 数据库
 * 云数据库版Redis: 使用 Redis Object Cache 插件，使得 WordPress 支持Redis 作为缓存
-* 对象存储OSS: WordPress 的文件存储在 OSS 上，通过 OSSFS (https://help.aliyun.com/document_detail/32196.html) 软件挂载到 ECS
+* 对象存储OSS: WordPress 的文件存储在 OSS 上，通过 [OSSFS](https://help.aliyun.com/document_detail/32196.html) 软件挂载到 ECS
 * 云服务器ECS: 安装 WordPress 应用，ECS 通过弹性伸缩服务实现自动伸缩
 * 负载均衡SLB: 作为负载均衡，将接收到的流量转发给后端的 WordPress 集群   
 
@@ -89,6 +89,6 @@
 ## 注意事项
 
 1. 容灾方案中的Redis节点是冷启动，启动后内存中没有恢复已有缓存的数据。因此您需要关注灾难恢复后数据库可能会遭受来自客户端重试导致瞬间的读写冲击。您应该在应用代码中实施类如熔断等机制以减少冲击。
-1. 在本次方案中，您需要在灾难恢复时填写保存在宁夏区域的AMI ID，以作为Autoscaling Launch Template中EC2启动的镜像。
+1. 在本次方案中，您需要在灾难恢复时填写保存在宁夏区域的AMI ID，以作为 AutoScaling Launch Template中EC2启动的镜像。
 1. 本安装需要您在宁夏区重新搭建一份 WordPress 应用。如果您在阿里云平台上对ECS进行了变更，请及时把该变更在宁夏区也同步完成，并生成对应的AMI，以保证宁夏区域的AMI保持最新状态。
 
