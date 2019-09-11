@@ -112,7 +112,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 1. Terraform 可以将信息存储在 S3 和 DynamoDB 中，创建用于存储 Terraform 状态的 S3 Bucket和 DynamoDB Table（由于使用的很少，DynamoDB 建议使用 On-Demand 
 收费方式）, 该 DynamoDB 的 primary key 必须为 `LockID`，类型为 string。在本环境中，该 DynamoDB Table名称
 为`tf-state`。
-   > **请勿在生产区域部署 S3, DynamoDB**，防止 Region Down 之后，无法使用 Terraform。
+   > **请勿在生产环境部署灾备切换需要的 S3 bucket和DynamoDB指定的Table **，防止 Region Down 之后，无法使用 Terraform。
 1. 在生产区域制作 AMI, 并拷贝到灾备区域。
 出于演示的目的，已经提前在 AWS 中国区域部署了 WordPress 5.2.2 版本的AMI. WordPress 应用程序位 于 /var/www/html 目录下，可直接使用。
    - 北京区域 AMI: ami-0eebef1aaa174c852
@@ -158,10 +158,9 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 
 
 ### 2. 灾备环境准备工作
-我们需要提前在灾备环境创建基础网络架构，来使得灾难发生时可以快速切换。在使用以下脚本的时候
-注意参数的配置。推荐使用脚本创建，这样可以提高自动化的水平。
+我们需要提前在灾备环境创建基础网络架构，来使得灾难发生时可以快速切换。推荐使用脚本创建，这样可以提高自动化的水平。在使用以下脚本的时候注意参数的配置。
 
-如果已经在 **创建模拟生产环境** 中修改了 `index.tf` 文件，无需修改该文件。
+如果已经在第一步 **创建模拟生产环境** 中修改了 `index.tf` 文件，无需修改该文件。
 
 **拷贝镜像**
 
@@ -225,7 +224,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 我们使用 workspace 来区分是模拟生产环境或者灾备环境
 1. 执行 `terraform apply --var-file=dr.tfvars` 创建基础网络环境
 
-**S3 数据同步**    
+**开启 S3 Cross Region Replication 进行数据同步**    
 1. 在灾备区域中创建 S3 Bucket, 并启用 **versioning** 功能，用于备份 WordPress 的 Media 文件
 1. 利用 AWS CLI 将已存在的文件拷贝到灾备区域，`aws s3 sync s3://SOURCE_BUCKET_NAME s3://TARGET_BUCKET_NAME`
 1. 在 S3 Console 中选择生产区域的 S3 Bucket, 点击 **Management**, 选择 **Replication**
@@ -353,17 +352,19 @@ RDS默认每24h在备份时段打一次快照，本章节介绍如何自定义�
 ### 5. （可选）销毁演示环境     
 可以通过以下步骤快速销毁演示环境。
 
-1. **销毁灾备环境**    
+1. **销毁灾备环境**
 以下都是 `dr` terraform workspace
-1. 在灾备区域 AWS RDS 控制台删除数据库实例
-1. 在 app 目录下执行 `terraform destroy --var-file=dr.tfvars`
-1. 在 basic 目录下执行 `terraform destroy --var-file=dr.tfvars`, 请在数据库实例删除后执行
+
+  1. 在灾备区域 AWS RDS 控制台删除数据库实例
+  1. 在 app 目录下执行 `terraform destroy --var-file=dr.tfvars`
+  1. 在 basic 目录下执行 `terraform destroy --var-file=dr.tfvars`, 请在数据库实例删除后执行
 
 1. **销毁演示生产环境**      
 以下都是 `prod` terraform workspace, 可以通过 `terraform workspace select prod` 切换。
-1. 在 app 目录下执行 `terraform destory`
-1. 在 database 目录下执行 `terraform destroy`
-1. 在 basic 目录下执行 `terraform destory`
+
+  1. 在 app 目录下执行 `terraform destory`
+  1. 在 database 目录下执行 `terraform destroy`
+  1. 在 basic 目录下执行 `terraform destory`
 
 1. 如需要，可手动删除 WordPress Media 文件 S3 Bucket, 以及 Terraform backend.
 
