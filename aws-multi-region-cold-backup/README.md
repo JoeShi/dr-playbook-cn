@@ -112,7 +112,7 @@ terraform脚本请点击[此处](https://github.com/lab798/aws-dr-samples)获取
 1. Terraform 可以将信息存储在 S3 和 DynamoDB 中，创建用于存储 Terraform 状态的 S3 Bucket和 DynamoDB Table（由于使用的很少，DynamoDB 建议使用 On-Demand 
 收费方式）, 该 DynamoDB 的 primary key 必须为 `LockID`，类型为 string。在本环境中，该 DynamoDB Table名称
 为`tf-state`。
-   > **请勿在生产环境部署灾备切换需要的 S3 bucket和DynamoDB指定的Table **，防止 Region Down 之后，无法使用 Terraform。
+   > **请勿在生产环境部署灾备切换需要的 S3 bucket和DynamoDB指定的Table**，防止 Region Down 之后，无法使用 Terraform。
 1. 在生产区域制作 AMI, 并拷贝到灾备区域。
 出于演示的目的，已经提前在 AWS 中国区域部署了 WordPress 5.2.2 版本的AMI. WordPress 应用程序位 于 /var/www/html 目录下，可直接使用。
    - 北京区域 AMI: ami-0eebef1aaa174c852
@@ -352,21 +352,23 @@ RDS默认每24h在备份时段打一次快照，本章节介绍如何自定义�
 ### 5. （可选）销毁演示环境     
 可以通过以下步骤快速销毁演示环境。
 
-1. **销毁灾备环境**
+**销毁灾备环境**
+
 以下都是 `dr` terraform workspace
 
   1. 在灾备区域 AWS RDS 控制台删除数据库实例
   1. 在 app 目录下执行 `terraform destroy --var-file=dr.tfvars`
   1. 在 basic 目录下执行 `terraform destroy --var-file=dr.tfvars`, 请在数据库实例删除后执行
 
-1. **销毁演示生产环境**      
+**销毁演示生产环境**    
+
 以下都是 `prod` terraform workspace, 可以通过 `terraform workspace select prod` 切换。
 
   1. 在 app 目录下执行 `terraform destory`
   1. 在 database 目录下执行 `terraform destroy`
   1. 在 basic 目录下执行 `terraform destory`
 
-1. 如需要，可手动删除 WordPress Media 文件 S3 Bucket, 以及 Terraform backend.
+如需要，可手动删除 WordPress Media 文件 S3 Bucket, 以及 Terraform backend.
 
 ## 脚本故障排查    
 **Terraform 故障排查**         
