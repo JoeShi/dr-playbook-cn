@@ -4,10 +4,10 @@
 
 ## SLA
 
-**Cold Backup (冷备)**
+**Cold Backup**
 RTO = 24小时, RPO = 24小时
 
-**Pilot Light (小火苗)** 
+**Pilot Light** 
 RTO = 4小时, RPO = 4小时
 
 ## 架构图
@@ -36,7 +36,7 @@ RTO = 4小时, RPO = 4小时
 
 利用AWS Storage Gateway File Gateway模式来实现非结构化数据的同步与灾备
 
-- 将Storage Gateway虚拟机镜像部署于本地IDC vmware虚拟化平台
+- 将Storage Gateway虚拟机镜像部署于本地 IDC VMWare 虚拟化平台
 - 定期rsync将NAS服务器文件拷贝至Storage Gateway
 - Storage Gateway自动将文件同步至S3存储桶
 - 云端虚拟机使用s3fs将S3存储桶挂载至本机卷进行文件访问

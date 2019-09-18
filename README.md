@@ -38,19 +38,18 @@ IT部门可以设计相应的应用架构、备份架构和灾备体系，通过
 不同的业务对于 RPO 和 RTO 的要求也不同。根据不同的要求，我们大概可以将灾备归类 **Cold Backup** , **Pilot Light** ,
 **Warm Standby** 和 **Hot Site**. 以下将介绍四种灾备类型的架构设计和灾中切换过程。
 
-1. **Cold Backup(冷备)** 
+1. **Cold Backup** 
 是指定期导出并上传业务数据；当灾难发生时，启动数据层和应用层资源，并导入数据。
 例如 MySQL 利用 mysqldump 工具进行定期的全量备份或增量备份。
 
-1. **Pilot Light(小火苗)** 
+1. **Pilot Light** 
 是指实时异步复制业务数据；当灾难发生时，启动应用层资源。
     ![](assets/dr-pilot-light-pre.png)
 
-1. **Warm Standby(温备)** 是指实时复制业务数据，应用层保持小规模资源配置；当灾难发生时，迅速扩大应用层资源。
+1. **Warm Standby** 是指主站点复制业务数据到容灾站点，应用层保持小规模资源配置；当灾难发生时，迅速扩大应用层资源。
     ![](assets/dr-warm-pre.png)
     
-1. **Hot Site(热备)** 是指实时同步/异步双向复制业务数据，应用层资源保持一定规模的配置，DNS 按权重
-解析到两个站点；当灾难发生时，DNS解析到单个站点, 并迅速扩大应用层资源。
+1. **Hot Site** 是指主站点和容灾站点进行业务数据的双向复制；当灾难发生时，DNS解析到单个站点, 并迅速扩大应用层资源。
     ![](assets/dr-hot-site.png)
 
 不同的备份方式所产生的成本也不同，以下是4种类型适合业务类型和成本对比:
@@ -69,7 +68,7 @@ IT部门可以设计相应的应用架构、备份架构和灾备体系，通过
 我们假设 WordPress Cluster 组件如下：
 
 * MySQL: WordPress 数据库 
-* Redis: 使用 Redis Object Cache 插件，使得 WordPress 支持Redis 作为缓存，提高用户访问体验
+* Redis: 使用 Redis Object Cache 插件，使得 WordPress 支持 Redis 作为缓存，提高用户访问体验
 * 共享存储: WordPress 的文件存储在共享存储上，每一台 WordPress 实例都可以访问相同的共享存储
 * 应用服务器: 安装 WordPress 应用
 * 负载均衡:  将接收到的流量转发给后端的 WordPress 集群
